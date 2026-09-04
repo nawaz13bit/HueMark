@@ -1,0 +1,118 @@
+{
+  "extName": {
+    "message": "HueMark - Multi-Word Highlighter",
+    "description": "Extension name shown in the browser toolbar and extension management page."
+  },
+  "extDescription": {
+    "message": "Search and highlight multiple words at once, in different colors, on any page - including dynamically loaded content and PDFs.",
+    "description": "Extension description shown on the extension management page and store listing."
+  },
+  "actionTitle": {
+    "message": "HueMark",
+    "description": "Tooltip shown when hovering the toolbar icon."
+  },
+  "commandCycleWord": {
+    "message": "Select the next word",
+    "description": "Keyboard shortcut description."
+  },
+  "commandJumpPrev": {
+    "message": "Jump to the previous match",
+    "description": "Keyboard shortcut description."
+  },
+  "commandJumpNext": {
+    "message": "Jump to the next match",
+    "description": "Keyboard shortcut description."
+  },
+  "commandToggleFc": {
+    "message": "Toggle bar (Chromium: cycles bar -> popup -> closed)",
+    "description": "Keyboard shortcut description."
+  },
+  "popupEnabled": {
+    "message": "Enabled",
+    "description": "Label for the master on/off toggle in the popup."
+  },
+  "popupWholeWord": {
+    "message": "Match whole words only",
+    "description": "Label for the whole-word-match checkbox in the popup."
+  },
+  "popupColorblind": {
+    "message": "Colorblind-friendly palette",
+    "description": "Label for the colorblind palette checkbox in the popup."
+  },
+  "popupOpenLocalPdf": {
+    "message": "Open local PDF...",
+    "description": "Button that opens a local PDF file picker."
+  },
+  "popupClearAll": {
+    "message": "Clear all",
+    "description": "Button that clears all search terms."
+  },
+  "popupHintPersist": {
+    "message": "Highlights persist across reloads and update as new content loads on the page.",
+    "description": "Footer hint text in the popup."
+  },
+  "popupHintLocalPdf": {
+    "message": "On Chrome/Edge, local PDFs also open automatically if you enable \"Allow access to file URLs\" for HueMark in your browser's extension settings - Firefox blocks this for extensions, so use \"Open local PDF...\" above instead.",
+    "description": "Footer hint text in the popup about local PDF file access."
+  },
+  "popupDonateLink": {
+    "message": "☕ Support this extension",
+    "description": "Donate link text in the popup footer."
+  },
+  "popupDonateDismiss": {
+    "message": "Not now, hide until next time",
+    "description": "Title/tooltip for the button that dismisses the donate link."
+  },
+  "termAddAnother": {
+    "message": "Add another word",
+    "description": "Tooltip for the + button that adds another search term."
+  },
+  "termPlaceholder": {
+    "message": "word or phrase...",
+    "description": "Placeholder text for the search term input box."
+  },
+  "termPreviousMatch": {
+    "message": "Previous match",
+    "description": "Tooltip for the up-arrow button that jumps to the previous match."
+  },
+  "termNextMatch": {
+    "message": "Next match",
+    "description": "Tooltip for the down-arrow button that jumps to the next match."
+  },
+  "termHighlightColor": {
+    "message": "Highlight color",
+    "description": "Tooltip for the color swatch button."
+  },
+  "termRemove": {
+    "message": "Remove this word",
+    "description": "Tooltip for the button that removes a search term."
+  },
+  "termDuplicateWarning": {
+    "message": "Another word already matches the same text - only one highlight color will show for it.",
+    "description": "Tooltip warning shown when two terms match the same text."
+  },
+  "termEmptyPlaceholder": {
+    "message": "(empty)",
+    "description": "Placeholder label shown for a search term with no text yet."
+  },
+  "barChooseWord": {
+    "message": "Choose word",
+    "description": "Tooltip for the dropdown toggle button in the floating on-page bar."
+  },
+  "barPreviousMatch": {
+    "message": "Previous match",
+    "description": "Tooltip for the previous-match button in the floating on-page bar."
+  },
+  "barNextMatch": {
+    "message": "Next match",
+    "description": "Tooltip for the next-match button in the floating on-page bar."
+  },
+  "barMoveCorner": {
+    "message": "Move to next corner",
+    "description": "Tooltip for the button that moves the floating bar to another screen corner."
+  },
+  "barClose": {
+    "message": "Close",
+    "description": "Tooltip for the button that closes the floating on-page bar."
+  }
+}

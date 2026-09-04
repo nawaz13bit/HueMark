@@ -1,0 +1,317 @@
+* { box-sizing: border-box; }
+
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --text-muted: #666;
+  --border: #dcdcdc;
+  --border-hover: #b6b6b6;
+  --box-bg: #fafafa;
+  --accent: #2d6cdf;
+  --accent-hover: #1f56b8;
+  --remove: #999;
+  --remove-hover: #e04b3f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1f22;
+    --text: #eaeaea;
+    --text-muted: #9a9a9a;
+    --border: #3a3b3e;
+    --border-hover: #55565a;
+    --box-bg: #2a2b2e;
+    --accent: #5b8def;
+    --accent-hover: #7ba3f2;
+    --remove: #8a8a8a;
+    --remove-hover: #ef6b5f;
+  }
+}
+
+body {
+  width: 340px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  padding: 12px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+}
+
+#termBoxes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.term-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Round buttons: the +, the up/down nav arrows, and the color swatch */
+.circle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--box-bg);
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.circle-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.circle-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.add-btn {
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.add-btn:hover {
+  color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.remove-btn {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.remove-btn:hover:not(:disabled) {
+  color: var(--remove-hover);
+  border-color: var(--remove-hover);
+}
+
+/* Each control lives in its own bordered box */
+.text-box {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--box-bg);
+}
+
+.text-box:focus-within {
+  border-color: var(--accent);
+}
+
+.term-box.duplicate .text-box {
+  border-color: var(--remove-hover);
+}
+
+.text-box input[type="text"] {
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 13px;
+  padding: 0;
+  outline: none;
+}
+
+.text-box input[type="text"]::placeholder {
+  color: var(--text-muted);
+}
+
+.nav-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--box-bg);
+}
+
+.nav-box .circle-btn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+}
+
+.nav-box .circle-btn:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.match-count {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 26px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.color-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.color-swatch-btn {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.color-popover {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.color-popover-swatch {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.color-popover-swatch:hover {
+  border-color: var(--accent);
+}
+
+#clearAllBtn,
+#openLocalPdfBtn {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--box-bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#openLocalPdfBtn {
+  margin-bottom: 10px;
+}
+
+#clearAllBtn {
+  margin-top: 10px;
+}
+
+#clearAllBtn:hover {
+  border-color: var(--remove-hover);
+  color: var(--remove-hover);
+}
+
+#openLocalPdfBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+footer {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.donate-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.donate-link {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.donate-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.donate-dismiss {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.donate-dismiss:hover {
+  color: var(--accent);
+}

@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_extName__",
+  "version": "0.1.0",
+  "default_locale": "en",
+  "description": "__MSG_extDescription__",
+  "permissions": ["storage", "scripting", "activeTab", "declarativeNetRequest"],
+  "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["vendor/pdfjs/web/*", "vendor/pdfjs/build/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "huemark@fnawaz.dev",
+      "data_collection_permissions": { "required": ["none"] }
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "scripts": ["src/background.js"]
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "__MSG_actionTitle__",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "commands": {
+    "huemark-cycle-word": {
+      "suggested_key": { "default": "Alt+Shift+Left", "mac": "Command+Shift+Left" },
+      "description": "__MSG_commandCycleWord__"
+    },
+    "huemark-jump-prev": {
+      "suggested_key": { "default": "Alt+Shift+Up", "mac": "Command+Shift+Up" },
+      "description": "__MSG_commandJumpPrev__"
+    },
+    "huemark-jump-next": {
+      "suggested_key": { "default": "Alt+Shift+Down", "mac": "Command+Shift+Down" },
+      "description": "__MSG_commandJumpNext__"
+    },
+    "huemark-toggle-fc": {
+      "suggested_key": { "default": "Alt+Shift+Right", "mac": "Command+Shift+Right" },
+      "description": "__MSG_commandToggleFc__"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/highlighter.js", "src/content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}
