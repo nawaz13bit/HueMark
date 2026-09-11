@@ -1,0 +1,237 @@
+<!doctype html>
+<title>HueMark Popup — Donate Link Preview</title>
+<meta charset="utf-8" />
+<style>
+* { box-sizing: border-box; }
+
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --text-muted: #666;
+  --border: #dcdcdc;
+  --border-hover: #b6b6b6;
+  --box-bg: #fafafa;
+  --accent: #2d6cdf;
+  --accent-hover: #1f56b8;
+  --remove: #999;
+  --remove-hover: #e04b3f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1e1f22;
+    --text: #eaeaea;
+    --text-muted: #9a9a9a;
+    --border: #3a3b3e;
+    --border-hover: #55565a;
+    --box-bg: #2a2b2e;
+    --accent: #5b8def;
+    --accent-hover: #7ba3f2;
+    --remove: #8a8a8a;
+    --remove-hover: #ef6b5f;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 40px;
+  background: #f2f2f2;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #101012; }
+}
+
+.frame {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.popup {
+  width: 340px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  padding: 12px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.popup.dark {
+  --bg: #1e1f22;
+  --text: #eaeaea;
+  --text-muted: #9a9a9a;
+  --border: #3a3b3e;
+  --border-hover: #55565a;
+  --box-bg: #2a2b2e;
+  --accent: #5b8def;
+  --accent-hover: #7ba3f2;
+  --remove: #8a8a8a;
+  --remove-hover: #ef6b5f;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+}
+
+#openLocalPdfBtn {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--box-bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+#clearAllBtn {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--box-bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+footer {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.donate-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.donate-link {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.donate-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.donate-dismiss {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.donate-dismiss:hover {
+  color: var(--accent);
+}
+
+.caption {
+  width: 340px;
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+.col { display: flex; flex-direction: column; align-items: center; }
+</style>
+
+<div class="col">
+  <div class="frame">
+    <div class="popup">
+      <header>
+        <h1>HueMark</h1>
+        <label class="toggle"><input type="checkbox" checked /> Enabled</label>
+      </header>
+      <label class="option-row"><input type="checkbox" checked /> Match whole words only</label>
+      <label class="option-row"><input type="checkbox" /> Colorblind-friendly palette</label>
+      <button id="openLocalPdfBtn" type="button">Open local PDF...</button>
+      <button id="clearAllBtn" type="button">Clear all</button>
+      <footer>
+        <p class="hint">Highlights persist across reloads and update as new content loads on the page.</p>
+        <span class="donate-row">
+          <a class="donate-link" href="https://www.paypal.com/ncp/payment/94WMESMZYV7AJ" target="_blank" rel="noopener">☕ Support this extension</a>
+          <button class="donate-dismiss" type="button" title="Not now, hide until next time">✕</button>
+        </span>
+      </footer>
+    </div>
+  </div>
+  <div class="caption">Light theme</div>
+</div>
+
+<div class="col">
+  <div class="frame">
+    <div class="popup dark">
+      <header>
+        <h1>HueMark</h1>
+        <label class="toggle"><input type="checkbox" checked /> Enabled</label>
+      </header>
+      <label class="option-row"><input type="checkbox" checked /> Match whole words only</label>
+      <label class="option-row"><input type="checkbox" /> Colorblind-friendly palette</label>
+      <button id="openLocalPdfBtn2" type="button">Open local PDF...</button>
+      <button id="clearAllBtn2" type="button">Clear all</button>
+      <footer>
+        <p class="hint">Highlights persist across reloads and update as new content loads on the page.</p>
+        <span class="donate-row">
+          <a class="donate-link" href="https://www.paypal.com/ncp/payment/94WMESMZYV7AJ" target="_blank" rel="noopener">☕ Support this extension</a>
+          <button class="donate-dismiss" type="button" title="Not now, hide until next time">✕</button>
+        </span>
+      </footer>
+    </div>
+  </div>
+  <div class="caption">Dark theme</div>
+</div>

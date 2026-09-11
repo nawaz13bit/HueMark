@@ -1,0 +1,100 @@
+<!doctype html>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="popup.css" />
+<style>
+  /* Applied only when ?theme=dark is used below, to force the dark
+     palette regardless of OS setting. Values must match popup.css's
+     @media (prefers-color-scheme: dark) block. */
+  body.force-dark {
+    color-scheme: dark;
+    --bg: #1e1f22;
+    --text: #eaeaea;
+    --text-muted: #9a9a9a;
+    --border: #3a3b3e;
+    --border-hover: #55565a;
+    --box-bg: #2a2b2e;
+    --accent: #5b8def;
+    --accent-hover: #7ba3f2;
+    --remove: #8a8a8a;
+    --remove-hover: #ef6b5f;
+  }
+</style>
+<body>
+  <header>
+    <h1>HueMark</h1>
+    <label class="toggle">
+      <input type="checkbox" checked />
+      <span>Enabled</span>
+    </label>
+  </header>
+
+  <label class="option-row">
+    <input type="checkbox" checked />
+    <span>Match whole words only</span>
+  </label>
+
+  <label class="option-row">
+    <input type="checkbox" />
+    <span>Colorblind-friendly palette</span>
+  </label>
+
+  <button type="button">Open local PDF...</button>
+
+  <div id="termBoxes">
+    <div class="term-box">
+      <button type="button" class="circle-btn add-btn">+</button>
+      <div class="text-box"><input type="text" value="revenue" /></div>
+      <div class="nav-box">
+        <button type="button" class="circle-btn nav-up">▲</button>
+        <button type="button" class="circle-btn nav-down">▼</button>
+        <span class="match-count">3/12</span>
+      </div>
+      <div class="color-box"><button type="button" class="color-swatch-btn" style="background-color:#ffd54f"></button></div>
+      <button type="button" class="circle-btn remove-btn">−</button>
+    </div>
+    <div class="term-box duplicate">
+      <button type="button" class="circle-btn add-btn" disabled>+</button>
+      <div class="text-box"><input type="text" value="revenue" /></div>
+      <div class="nav-box">
+        <button type="button" class="circle-btn nav-up" disabled>▲</button>
+        <button type="button" class="circle-btn nav-down" disabled>▼</button>
+        <span class="match-count">0/0</span>
+      </div>
+      <div class="color-box"><button type="button" class="color-swatch-btn" style="background-color:#4fc3f7"></button></div>
+      <button type="button" class="circle-btn remove-btn">−</button>
+    </div>
+    <div class="term-box">
+      <button type="button" class="circle-btn add-btn" disabled>+</button>
+      <div class="text-box"><input type="text" placeholder="Add a term..." value="" /></div>
+      <div class="nav-box">
+        <button type="button" class="circle-btn nav-up" disabled>▲</button>
+        <button type="button" class="circle-btn nav-down" disabled>▼</button>
+        <span class="match-count">0/0</span>
+      </div>
+      <div class="color-box"><button type="button" class="color-swatch-btn" style="background-color:#81c784"></button></div>
+      <button type="button" class="circle-btn remove-btn" disabled>−</button>
+    </div>
+  </div>
+
+  <button type="button">Clear all</button>
+
+  <footer>
+    <p class="hint">Highlights persist across reloads and update as new content loads on the page.</p>
+    <p class="hint">On Chrome/Edge, local PDFs also open automatically if you enable "Allow access to file URLs" for HueMark in your browser's extension settings - Firefox blocks this for extensions, so use "Open local PDF..." above instead.</p>
+    <span class="donate-row">
+      <a class="donate-link" href="https://www.paypal.com/ncp/payment/94WMESMZYV7AJ" target="_blank" rel="noopener">☕ Support this extension</a>
+      <button class="donate-dismiss" type="button" title="Not now, hide until next time">✕</button>
+    </span>
+  </footer>
+
+  <script>
+    if (new URLSearchParams(location.search).get("theme") === "dark") {
+      document.body.classList.add("force-dark");
+    }
+    // Demo-only stand-in for donate.js's dismiss handler (hides on click,
+    // no real storage persistence since this is a static preview).
+    document.querySelector(".donate-dismiss").onclick = () => {
+      document.querySelector(".donate-row").hidden = true;
+    };
+  </script>
+</body>

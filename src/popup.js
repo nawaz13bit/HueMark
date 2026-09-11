@@ -485,7 +485,11 @@ async function connectPopupPort() {
   const tab = await getActiveTab();
   if (!tab?.id) return;
   try {
-    chrome.tabs.connect(tab.id, { name: "huemark-popup", frameId: 0 });
+    const port = chrome.tabs.connect(tab.id, { name: "huemark-popup", frameId: 0 });
+    // No listener on the other end fails asynchronously via onDisconnect,
+    // not by throwing here - read lastError to mark it "checked" and stop
+    // Chrome from logging "Unchecked runtime.lastError".
+    port.onDisconnect.addListener(() => void chrome.runtime.lastError);
   } catch {
     // restricted page or no content script listening - nothing to do
   }

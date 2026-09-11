@@ -38,6 +38,10 @@ body {
   color: var(--text);
 }
 
+input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
 header {
   display: flex;
   align-items: center;
@@ -282,6 +286,10 @@ footer {
   color: var(--text-muted);
   margin: 0;
   line-height: 1.4;
+}
+
+.donate-row[hidden] {
+  display: none;
 }
 
 .donate-row {

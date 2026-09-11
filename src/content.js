@@ -2,7 +2,7 @@
   if (window.__huemarkContentLoaded) return; // avoid double listeners if injected twice
   window.__huemarkContentLoaded = true;
 
-  const { highlight, clearHighlights, HUEMARK_CLASS } = window.__huemark;
+  const { highlight, highlightNodes, clearHighlights, HUEMARK_CLASS } = window.__huemark;
 
   let currentTerms = [];
   let currentOptions = { enabled: true, wholeWord: false };
@@ -36,12 +36,21 @@
     currentIndex = nextIndex;
   }
 
+  // Snapshot of the terms/options actually reflected in the current DOM
+  // highlights, as of the last applyState() run - distinct from currentTerms,
+  // which the bar's live-typing UI mutates in place ahead of the debounced
+  // storage write that eventually echoes back through onChanged.
+  let lastAppliedTermsJSON = null;
+  let lastAppliedOptionsJSON = null;
+
   function applyState() {
     clearHighlights(document.body);
     currentMarkEl = null; // old <mark> elements are gone, nothing to un-mark
     if (currentOptions.enabled) runFullHighlight();
     rebuildMatchGroups();
     syncBarWords();
+    lastAppliedTermsJSON = JSON.stringify(currentTerms);
+    lastAppliedOptionsJSON = JSON.stringify(currentOptions);
   }
 
   // The <mark> currently scrolled-to via jump(), kept visually distinct from
@@ -85,20 +94,76 @@
     return { count: arr.length, current: idx + 1 };
   }
 
+  // Mutation batches accumulate here across possibly-several MutationObserver
+  // callback firings before the debounce timer flushes them, so nothing
+  // queued in an earlier firing is lost when a later one resets the timer.
+  let pendingRoots = new Set();
+  let pendingTextNodes = new Set();
+  let pendingRemoval = false;
+
+  function queueMutations(mutations) {
+    for (const m of mutations) {
+      if (m.type === "childList") {
+        m.addedNodes.forEach((n) => {
+          if (n.nodeType === Node.ELEMENT_NODE || n.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            pendingRoots.add(n);
+          } else if (n.nodeType === Node.TEXT_NODE) {
+            pendingTextNodes.add(n);
+          }
+        });
+        if (m.removedNodes.length > 0) pendingRemoval = true;
+      } else if (m.type === "characterData") {
+        pendingTextNodes.add(m.target);
+      }
+    }
+  }
+
+  // Rescans only what actually changed since the last flush - not the whole
+  // document.body - so cost tracks the size of what was added/edited rather
+  // than the size of the whole page (which only grows on infinite-scroll
+  // pages, making a full-body rescan on every batch progressively slower).
+  function runIncrementalHighlight() {
+    const roots = pendingRoots;
+    const textNodes = pendingTextNodes;
+    const removalHappened = pendingRemoval;
+    pendingRoots = new Set();
+    pendingTextNodes = new Set();
+    pendingRemoval = false;
+
+    if (!currentOptions.enabled || currentTerms.length === 0) return;
+
+    let newMarks = 0;
+    const liveRoots = [...roots].filter((r) => r.isConnected);
+    // Skip roots nested inside another pending root so the same subtree
+    // isn't walked twice in one flush.
+    const outerRoots = liveRoots.filter((r) => !liveRoots.some((other) => other !== r && other.contains(r)));
+    for (const root of outerRoots) {
+      newMarks += highlight(root, currentTerms, currentOptions);
+    }
+
+    const standaloneTextNodes = [...textNodes].filter(
+      (n) => n.isConnected && !outerRoots.some((r) => r.contains(n))
+    );
+    if (standaloneTextNodes.length > 0) {
+      newMarks += highlightNodes(standaloneTextNodes, currentTerms, currentOptions);
+    }
+
+    // matchGroups only needs rebuilding when the set of <mark>s could have
+    // actually changed - new ones were just added, or mutation records
+    // reported removals (which may have taken existing marks with them).
+    if (newMarks > 0 || removalHappened) {
+      rebuildMatchGroups();
+      syncBarWords();
+    }
+  }
+
   function startObserving() {
     if (observer) observer.disconnect();
-    observer = new MutationObserver(() => {
+    observer = new MutationObserver((mutations) => {
       if (!currentOptions.enabled || currentTerms.length === 0) return;
-      // Re-run a full pass on any batch of mutations rather than trying to
-      // track individual added nodes across debounced callbacks - a full
-      // pass is cheap since collectTextNodes() skips text already inside
-      // an existing highlight, and it can't silently drop dropped batches.
+      queueMutations(mutations);
       clearTimeout(debounceHandle);
-      debounceHandle = setTimeout(() => {
-        runFullHighlight();
-        rebuildMatchGroups();
-        syncBarWords();
-      }, 150);
+      debounceHandle = setTimeout(runIncrementalHighlight, 150);
     });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
@@ -490,15 +555,32 @@
     setupScrollObserver();
   }
 
+  // Elements currently under `scrollObserver`, so a rebuild can be skipped
+  // when the active term's match set hasn't actually changed - matchGroups
+  // gets a brand-new Map/array on every rebuild even when its contents are
+  // identical, so this compares element-by-element rather than by reference.
+  let observedTerm = null;
+  let observedEls = [];
+
+  function sameEls(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
   // Keeps the bar's counter in sync with manual scrolling, not just arrow
   // clicks - a mark crossing the vertical center band is treated as "current".
   function setupScrollObserver() {
-    if (scrollObserver) scrollObserver.disconnect();
     const entry = activeEntry();
     const term = entry?.term.trim().toLowerCase();
-    if (!term) return;
-    const arr = matchGroups.get(term) || [];
-    if (arr.length === 0) return;
+    const arr = term ? matchGroups.get(term) || [] : [];
+
+    if (term === observedTerm && sameEls(arr, observedEls)) return; // nothing to redo
+
+    if (scrollObserver) scrollObserver.disconnect();
+    observedTerm = term || null;
+    observedEls = arr;
+    if (!term || arr.length === 0) return;
 
     scrollObserver = new IntersectionObserver(
       (entries) => {
@@ -534,14 +616,25 @@
     // clicking the move-corner button) has nothing to do with highlighted
     // content and shouldn't drop the current-match outline or pay for a
     // full-document rebuild.
+    // Some browsers redeliver onChanged when a value is written back
+    // unchanged (e.g. a duplicate storage.set, or a sync conflict resolving
+    // to the same value). Comparing against what's actually reflected in the
+    // DOM right now - not against currentTerms/currentOptions, which the
+    // bar's live-typing UI mutates in place before its own debounced write
+    // even lands - lets a truly no-op echo skip the full clear+rehighlight,
+    // while a genuine rename (bar edit -> storage write -> this listener)
+    // still refreshes normally since lastAppliedTermsJSON still reflects the
+    // pre-edit DOM state at that point.
     let needsHighlightRefresh = false;
     if (changes.huemark_terms) {
-      currentTerms = changes.huemark_terms.newValue || [];
-      needsHighlightRefresh = true;
+      const nextTerms = changes.huemark_terms.newValue || [];
+      if (JSON.stringify(nextTerms) !== lastAppliedTermsJSON) needsHighlightRefresh = true;
+      currentTerms = nextTerms;
     }
     if (changes.huemark_options) {
-      currentOptions = { enabled: true, wholeWord: false, ...(changes.huemark_options.newValue || {}) };
-      needsHighlightRefresh = true;
+      const nextOptions = { enabled: true, wholeWord: false, ...(changes.huemark_options.newValue || {}) };
+      if (JSON.stringify(nextOptions) !== lastAppliedOptionsJSON) needsHighlightRefresh = true;
+      currentOptions = nextOptions;
     }
     if (changes.huemark_bar_position && BAR_CORNERS.includes(changes.huemark_bar_position.newValue)) {
       barPosition = changes.huemark_bar_position.newValue;
