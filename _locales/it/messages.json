@@ -12,6 +12,7 @@
   "popupOpenLocalPdf": { "message": "Apri PDF locale..." },
   "popupClearAll": { "message": "Cancella tutto" },
   "popupHintPersist": { "message": "Le evidenziazioni persistono dopo il ricaricamento e si aggiornano quando nuovi contenuti vengono caricati nella pagina." },
+  "popupPdfHelpTitle": { "message": "Guida ai PDF locali" },
   "popupHintLocalPdf": { "message": "Su Chrome/Edge, i PDF locali si aprono automaticamente anche se abiliti \"Consenti accesso agli URL dei file\" per HueMark nelle impostazioni delle estensioni del browser - Firefox lo blocca per le estensioni, quindi usa \"Apri PDF locale...\" sopra. Su Firefox, questo pulsante apre la scheda del visualizzatore PDF; fai clic lì sul suo pulsante \"Apri file\" per scegliere il tuo PDF." },
   "popupDonateLink": { "message": "☕ Sostieni questa estensione" },
   "popupDonateDismiss": { "message": "Non ora, nascondi fino alla prossima volta" },

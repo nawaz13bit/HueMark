@@ -12,6 +12,7 @@
   "popupOpenLocalPdf": { "message": "فتح ملف PDF محلي..." },
   "popupClearAll": { "message": "مسح الكل" },
   "popupHintPersist": { "message": "يستمر التمييز بعد إعادة التحميل ويتم تحديثه مع تحميل محتوى جديد في الصفحة." },
+  "popupPdfHelpTitle": { "message": "مساعدة ملفات PDF المحلية" },
   "popupHintLocalPdf": { "message": "في Chrome/Edge، تُفتح ملفات PDF المحلية تلقائيًا أيضًا إذا قمت بتفعيل \"السماح بالوصول إلى عناوين URL للملفات\" لإضافة HueMark في إعدادات إضافات المتصفح - يمنع Firefox ذلك للإضافات، لذا استخدم \"فتح ملف PDF محلي...\" أعلاه بدلاً من ذلك. في Firefox، يفتح هذا الزر علامة تبويب عارض PDF؛ انقر هناك على زر \"فتح ملف\" الخاص به لاختيار ملف PDF." },
   "popupDonateLink": { "message": "☕ ادعم هذه الإضافة" },
   "popupDonateDismiss": { "message": "ليس الآن، إخفاء حتى المرة القادمة" },

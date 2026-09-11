@@ -12,6 +12,7 @@
   "popupOpenLocalPdf": { "message": "로컬 PDF 열기..." },
   "popupClearAll": { "message": "모두 지우기" },
   "popupHintPersist": { "message": "강조 표시는 새로고침 후에도 유지되며 페이지에 새 콘텐츠가 로드될 때마다 업데이트됩니다." },
+  "popupPdfHelpTitle": { "message": "로컬 PDF 도움말" },
   "popupHintLocalPdf": { "message": "Chrome/Edge에서는 브라우저의 확장 프로그램 설정에서 HueMark에 대해 \"파일 URL에 대한 액세스 허용\"을 활성화하면 로컬 PDF도 자동으로 열립니다. Firefox는 확장 프로그램에 대해 이를 차단하므로 위의 \"로컬 PDF 열기...\"를 대신 사용하세요. Firefox에서는 이 버튼이 PDF 뷰어 탭을 엽니다. 거기서 자체 \"파일 열기\" 버튼을 클릭하여 PDF를 선택하세요." },
   "popupDonateLink": { "message": "☕ 이 확장 프로그램 후원하기" },
   "popupDonateDismiss": { "message": "지금은 안 함, 다음까지 숨기기" },

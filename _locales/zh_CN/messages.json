@@ -12,6 +12,7 @@
   "popupOpenLocalPdf": { "message": "打开本地 PDF..." },
   "popupClearAll": { "message": "全部清除" },
   "popupHintPersist": { "message": "高亮会在页面重新加载后保留，并随着页面加载新内容而更新。" },
+  "popupPdfHelpTitle": { "message": "本地 PDF 帮助" },
   "popupHintLocalPdf": { "message": "在 Chrome/Edge 中，如果在浏览器的扩展设置中为 HueMark 启用“允许访问文件网址”，本地 PDF 也会自动打开——Firefox 会阻止扩展执行此操作，请改用上方的“打开本地 PDF...”。在 Firefox 中，该按钮会打开 PDF 查看器标签页；请在那里点击其自带的“打开文件”按钮来选择您的 PDF。" },
   "popupDonateLink": { "message": "☕ 支持这个扩展" },
   "popupDonateDismiss": { "message": "暂时不用，下次再显示" },

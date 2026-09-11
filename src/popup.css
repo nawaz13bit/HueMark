@@ -288,6 +288,24 @@ footer {
   line-height: 1.4;
 }
 
+.pdf-help {
+  margin-top: 6px;
+}
+
+.pdf-help summary {
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.pdf-help summary:hover {
+  color: var(--accent);
+}
+
+.pdf-help .hint {
+  margin-top: 6px;
+}
+
 .donate-row[hidden] {
   display: none;
 }
