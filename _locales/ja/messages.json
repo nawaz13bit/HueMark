@@ -12,7 +12,7 @@
   "popupOpenLocalPdf": { "message": "ローカルPDFを開く..." },
   "popupClearAll": { "message": "すべてクリア" },
   "popupHintPersist": { "message": "ハイライトは再読み込み後も保持され、ページに新しいコンテンツが読み込まれるたびに更新されます。" },
-  "popupHintLocalPdf": { "message": "Chrome/Edgeでは、ブラウザの拡張機能設定でHueMarkの「ファイルのURLへのアクセスを許可する」を有効にすると、ローカルPDFも自動的に開きます。Firefoxは拡張機能に対してこれをブロックするため、代わりに上の「ローカルPDFを開く...」を使用してください。" },
+  "popupHintLocalPdf": { "message": "Chrome/Edgeでは、ブラウザの拡張機能設定でHueMarkの「ファイルのURLへのアクセスを許可する」を有効にすると、ローカルPDFも自動的に開きます。Firefoxは拡張機能に対してこれをブロックするため、代わりに上の「ローカルPDFを開く...」を使用してください。Firefoxでは、このボタンはPDFビューアのタブを開きます。そこにある「ファイルを開く」ボタンをクリックしてPDFを選択してください。" },
   "popupDonateLink": { "message": "☕ この拡張機能を支援する" },
   "popupDonateDismiss": { "message": "今はしない、次回まで非表示にする" },
   "termAddAnother": { "message": "単語を追加" },

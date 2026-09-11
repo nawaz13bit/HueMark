@@ -66,6 +66,12 @@ around this by:
 Works for both http(s) and local (`file://`) PDFs on Chrome, Edge, and
 Firefox.
 
+On Firefox, local PDFs must be opened via the popup's "Open local PDF..."
+button, which opens the bundled PDF.js viewer tab — use the viewer's own
+"Open File" button from there to pick your file. Firefox tears down the
+extension popup the instant a native file picker opens, so the popup's
+own in-popup file picker (used on Chrome/Edge) doesn't work there.
+
 ## Browser support
 
 | Browser | Status |

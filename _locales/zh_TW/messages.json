@@ -12,7 +12,7 @@
   "popupOpenLocalPdf": { "message": "開啟本機 PDF..." },
   "popupClearAll": { "message": "全部清除" },
   "popupHintPersist": { "message": "標示會在重新載入後保留，並隨著頁面載入新內容而更新。" },
-  "popupHintLocalPdf": { "message": "在 Chrome/Edge 中，如果在瀏覽器的擴充功能設定中為 HueMark 啟用「允許存取檔案網址」，本機 PDF 也會自動開啟——Firefox 會封鎖擴充功能執行此操作，請改用上方的「開啟本機 PDF...」。" },
+  "popupHintLocalPdf": { "message": "在 Chrome/Edge 中，如果在瀏覽器的擴充功能設定中為 HueMark 啟用「允許存取檔案網址」，本機 PDF 也會自動開啟——Firefox 會封鎖擴充功能執行此操作，請改用上方的「開啟本機 PDF...」。在 Firefox 中，該按鈕會開啟 PDF 檢視器分頁；請在那裡點擊其自帶的「開啟檔案」按鈕來選擇您的 PDF。" },
   "popupDonateLink": { "message": "☕ 支持這個擴充功能" },
   "popupDonateDismiss": { "message": "暫時不要，下次再顯示" },
   "termAddAnother": { "message": "新增其他詞語" },

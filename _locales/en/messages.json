@@ -52,7 +52,7 @@
     "description": "Footer hint text in the popup."
   },
   "popupHintLocalPdf": {
-    "message": "On Chrome/Edge, local PDFs also open automatically if you enable \"Allow access to file URLs\" for HueMark in your browser's extension settings - Firefox blocks this for extensions, so use \"Open local PDF...\" above instead.",
+    "message": "On Chrome/Edge, local PDFs also open automatically if you enable \"Allow access to file URLs\" for HueMark in your browser's extension settings - Firefox blocks this for extensions, so use \"Open local PDF...\" above instead. On Firefox, that button opens the PDF viewer tab; click its own \"Open File\" button there to pick your PDF.",
     "description": "Footer hint text in the popup about local PDF file access."
   },
   "popupDonateLink": {

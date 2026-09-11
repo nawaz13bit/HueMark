@@ -12,7 +12,7 @@
   "popupOpenLocalPdf": { "message": "Lokale PDF öffnen..." },
   "popupClearAll": { "message": "Alle löschen" },
   "popupHintPersist": { "message": "Hervorhebungen bleiben nach dem Neuladen erhalten und werden aktualisiert, wenn neue Inhalte auf der Seite geladen werden." },
-  "popupHintLocalPdf": { "message": "Unter Chrome/Edge öffnen sich lokale PDFs auch automatisch, wenn Sie \"Zugriff auf Datei-URLs zulassen\" für HueMark in den Erweiterungseinstellungen Ihres Browsers aktivieren - Firefox blockiert dies für Erweiterungen, verwenden Sie daher oben \"Lokale PDF öffnen...\"." },
+  "popupHintLocalPdf": { "message": "Unter Chrome/Edge öffnen sich lokale PDFs auch automatisch, wenn Sie \"Zugriff auf Datei-URLs zulassen\" für HueMark in den Erweiterungseinstellungen Ihres Browsers aktivieren - Firefox blockiert dies für Erweiterungen, verwenden Sie daher oben \"Lokale PDF öffnen...\". Unter Firefox öffnet diese Schaltfläche den PDF-Viewer-Tab; klicken Sie dort auf dessen eigene Schaltfläche \"Datei öffnen\", um Ihre PDF auszuwählen." },
   "popupDonateLink": { "message": "☕ Diese Erweiterung unterstützen" },
   "popupDonateDismiss": { "message": "Nicht jetzt, bis zum nächsten Mal ausblenden" },
   "termAddAnother": { "message": "Weiteres Wort hinzufügen" },
