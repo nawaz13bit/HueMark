@@ -21,7 +21,7 @@ function buildMatcher(terms, wholeWord) {
   // terms: [{ term, color }]
   const alternatives = terms
     .filter(t => t.term && t.term.trim().length > 0)
-    .sort((a, b) => b.term.length - a.term.length) // longest match first
+    .sort((a, b) => b.term.trim().length - a.term.trim().length) // longest match first
     .map(t => escapeRegExp(t.term.trim()));
 
   if (alternatives.length === 0) return null;
