@@ -55,12 +55,12 @@ cualquier página.
 
 **Search terms:**
 - resaltar (highlight)
-- resaltador de texto (text highlighter)
-- resaltado multicolor (multi-color highlight)
-- resaltador de palabras clave (keyword highlighter)
-- resaltador de PDF (PDF highlighter)
-- buscar y resaltar (find and highlight)
-- resaltador de palabras (word highlighter)
+- resaltador (highlighter) de (of) texto (text)
+- resaltado (highlight) multicolor (multi-color)
+- resaltador (highlighter) de (of) palabras (words) clave (key)
+- resaltador (highlighter) de (of) PDF (PDF)
+- buscar (find) y (and) resaltar (highlight)
+- resaltador (highlighter) de (of) palabras (words)
 
 ---
 
@@ -113,12 +113,12 @@ fils d'information sur n'importe quelle page.
 
 **Search terms:**
 - surligner (highlight)
-- surligneur de texte (text highlighter)
-- surlignage multicolore (multi-color highlight)
-- surligneur de mots-clés (keyword highlighter)
-- surligneur PDF (PDF highlighter)
-- rechercher et surligner (find and highlight)
-- surligneur de mots (word highlighter)
+- surligneur (highlighter) de (of) texte (text)
+- surlignage (highlight) multicolore (multi-color)
+- surligneur (highlighter) de (of) mots-clés (keywords)
+- surligneur (highlighter) PDF (PDF)
+- rechercher (find) et (and) surligner (highlight)
+- surligneur (highlighter) de (of) mots (words)
 
 ---
 
@@ -172,11 +172,11 @@ visuell zu verfolgen.
 **Search terms:**
 - markieren (highlight)
 - texthervorhebung (text highlighter)
-- mehrfarbige markierung (multi-color highlight)
-- schlagwort-markierung (keyword highlighter)
-- pdf-markierung (PDF highlighter)
-- suchen und markieren (find and highlight)
-- wort-markierung (word highlighter)
+- mehrfarbige (multi-color) markierung (highlight)
+- schlagwort (keyword) markierung (highlight)
+- pdf (PDF) markierung (highlight)
+- suchen (search) und (and) markieren (highlight)
+- wort (word) markierung (highlight)
 
 ---
 
@@ -226,12 +226,116 @@ HueMarkを使えば、複数の検索語を一度にそれぞれ別の色でハ�
 
 **Search terms:**
 - ハイライト (highlight)
-- テキストハイライター (text highlighter)
-- マルチカラーハイライト (multi-color highlight)
-- キーワードハイライター (keyword highlighter)
-- PDFハイライター (PDF highlighter)
-- 検索してハイライト (find and highlight)
-- 単語ハイライター (word highlighter)
+- テキスト (text) ハイライター (highlighter)
+- マルチカラー (multi-color) ハイライト (highlight)
+- キーワード (keyword) ハイライター (highlighter)
+- PDF (PDF) ハイライター (highlighter)
+- 検索して (search) ハイライト (highlight)
+- 単語 (word) ハイライター (highlighter)
+
+---
+
+## Arabic (ar)
+
+**Search terms:**
+- تمييز (highlight)
+- مميز (highlighter) النص (the text)
+- تمييز (highlight) متعدد الألوان (multi-color)
+- تمييز (highlight) الكلمات (words) المفتاحية (key)
+- تمييز (highlight) PDF (PDF)
+- البحث (search) و (and) التمييز (highlight)
+- مميز (highlighter) الكلمات (words)
+
+---
+
+## Hindi (hi)
+
+**Search terms:**
+- हाइलाइट (highlight)
+- टेक्स्ट (text) हाइलाइटर (highlighter)
+- मल्टी-कलर (multi-color) हाइलाइट (highlight)
+- कीवर्ड (keyword) हाइलाइटर (highlighter)
+- पीडीएफ (PDF) हाइलाइटर (highlighter)
+- खोजें (find) और (and) हाइलाइट करें (highlight)
+- शब्द (word) हाइलाइटर (highlighter)
+
+---
+
+## Italian (it)
+
+**Search terms:**
+- evidenziare (highlight)
+- evidenziatore (highlighter) di (of) testo (text)
+- evidenziazione (highlight) multicolore (multi-color)
+- evidenziatore (highlighter) di (of) parole (words) chiave (key)
+- evidenziatore (highlighter) PDF (PDF)
+- cerca (find) ed (and) evidenzia (highlight)
+- evidenziatore (highlighter) di (of) parole (words)
+
+---
+
+## Korean (ko)
+
+**Search terms:**
+- 하이라이트 (highlight)
+- 텍스트 (text) 하이라이터 (highlighter)
+- 멀티컬러 (multi-color) 하이라이트 (highlight)
+- 키워드 (keyword) 하이라이터 (highlighter)
+- PDF (PDF) 하이라이터 (highlighter)
+- 검색 (search) 후 (then) 강조 표시 (highlight)
+- 단어 (word) 하이라이터 (highlighter)
+
+---
+
+## Portuguese - Brazil (pt_BR)
+
+**Search terms:**
+- destacar (highlight)
+- destacador (highlighter) de (of) texto (text)
+- destaque (highlight) multicolorido (multi-color)
+- destacador (highlighter) de (of) palavras-chave (keywords)
+- destacador (highlighter) de (of) PDF (PDF)
+- pesquisar (search) e (and) destacar (highlight)
+- destacador (highlighter) de (of) palavras (words)
+
+---
+
+## Russian (ru)
+
+**Search terms:**
+- подсветка (highlight)
+- подсветка (highlight) текста (of text)
+- многоцветная (multi-color) подсветка (highlight)
+- подсветка (highlight) ключевых (key) слов (words)
+- подсветка (highlight) PDF (PDF)
+- поиск (search) и (and) подсветка (highlight)
+- подсветка (highlight) слов (of words)
+
+---
+
+## Chinese - Simplified (zh_CN)
+
+**Search terms:**
+- 高亮 (highlight)
+- 文本 (text) 高亮工具 (highlighter)
+- 多色 (multi-color) 高亮 (highlight)
+- 关键词 (keyword) 高亮工具 (highlighter)
+- PDF (PDF) 高亮工具 (highlighter)
+- 搜索 (search) 并 (and) 高亮 (highlight)
+- 词语 (word) 高亮工具 (highlighter)
+
+---
+
+## Chinese - Traditional (zh_TW)
+
+**Search terms:**
+- 標示 (highlight)
+- 文字 (text) 螢光筆 (highlighter)
+- 多色 (multi-color) 標示 (highlight)
+- 關鍵字 (keyword) 螢光筆 (highlighter)
+- PDF (PDF) 螢光筆 (highlighter)
+- 搜尋 (search) 並 (and) 標示 (highlight)
+- 詞語 (word) 螢光筆 (highlighter)
 
 ---
 
@@ -245,3 +349,19 @@ For each language in Partner Center's Store listings tab:
    baked into them) — only the popup UI shown in the screenshots is
    already localized via `_locales/`, if you want to re-capture screenshots
    per-language later that's a separate, lower-priority pass
+
+**Note on the 9 additional languages (ar, hi, it, ko, pt_BR, ru, zh_CN,
+zh_TW):** only search terms are drafted so far, using the same vocabulary
+as each language's in-product UI strings (`_locales/<code>/messages.json`).
+If Partner Center requires short/full description for any language tab you
+add (not just search terms) to allow publishing, ask for those to be
+translated too before adding that language — don't add a tab you can't
+fully fill in, since Partner Center blocks publish on incomplete language
+tabs.
+
+**Search term format:** each entry shows the term as a user would type it,
+with individual words broken out and glossed in parentheses immediately
+next to that word, e.g. `resaltador (highlighter) de (of) texto (text)` —
+so you can identify which part of a multi-word term means what without
+needing the whole phrase translated separately. Single-word terms (and
+German compounds, which don't split like phrases) are glossed as one unit.
