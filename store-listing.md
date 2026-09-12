@@ -68,6 +68,43 @@ Productivity / Accessibility
   redirect PDF navigations to the bundled PDF.js viewer, since PDFs can be
   hosted on any domain.
 
+## Notes for certification (Edge Partner Center, <2000 chars)
+
+HueMark is a multi-color text/keyword highlighter for web pages and PDFs.
+No login, no account, no backend — everything runs locally in the
+browser.
+
+How to test:
+1. Click the toolbar icon to open the popup.
+2. Type a word or phrase into the term field and pick a color; add more
+   terms with the "+" button, each gets its own color.
+3. Matches are highlighted immediately on the current page. Reload the
+   page or navigate elsewhere and back — highlights reapply automatically
+   from saved state.
+4. Open a PDF (e.g. any http(s) link ending in .pdf, or via "Open local
+   PDF..." in the popup) — the same terms highlight inside the bundled
+   PDF.js viewer.
+5. Alt+Shift+Up/Down jumps between matches; Alt+Shift+Left/Right cycles
+   which term is active. A floating bar (Alt+Shift+B or the toolbar
+   command) offers the same controls without opening the popup.
+
+Why broad host permissions (`<all_urls>`) are requested: HueMark has no
+fixed set of target sites — users choose their own search terms and
+expect them highlighted on any page or PDF they visit, including after
+reload/revisit and as new content streams in on dynamic pages (a
+MutationObserver watches for DOM changes). `activeTab` can't support this
+because its grant is per-gesture and doesn't survive reload or
+navigation, which would break the core "highlights persist" behavior.
+Broad host access is also needed for `declarativeNetRequest`, which
+redirects PDF navigations (any domain) to the bundled PDF.js viewer,
+since browsers block third-party scripts inside their built-in PDF
+viewer.
+
+Privacy: no data collection, no analytics, no remote servers. All terms,
+colors, and settings are stored locally via `chrome.storage.local` and
+never transmitted anywhere. Source is public:
+https://github.com/nawaz13bit/HueMark
+
 ## Screenshots (in `screenshots/store/`, ready to upload — 1280x800, letterboxed via `scripts/resize-screenshots.ps1`)
 
 - `01-webpage-highlights-popup.png` — Wikipedia article with 6 terms
