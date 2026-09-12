@@ -72,6 +72,8 @@ Productivity / Accessibility
   counts per term.
 - `promo-tile-440x280.png` — small promo tile (Chrome Web Store), generated
   from the toolbar icon's stripe motif + wordmark.
+- `marquee-tile-1400x560.png` — optional marquee promo tile (Chrome Web
+  Store, only used if Google features the extension), same motif scaled up.
 
 ## Homepage / support URL
 
