@@ -73,6 +73,13 @@ Productivity / Accessibility
 - `promo-tile-440x280.png` — small promo tile (Chrome Web Store), generated
   from the toolbar icon's stripe motif + wordmark.
 
+## Homepage / support URL
+
+https://github.com/nawaz13bit/HueMark
+
+(Public source repo — use for the "Support URL" / "Homepage URL" fields on
+Chrome Web Store, Edge Add-ons, and Firefox AMO.)
+
 ## Privacy policy
 
 https://github.com/nawaz13bit/HueMark/blob/main/PRIVACY.md

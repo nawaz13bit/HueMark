@@ -15,7 +15,7 @@ $zipPath = Join-Path $distDir "huemark-$version.zip"
 New-Item -ItemType Directory -Force -Path $distDir | Out-Null
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 
-$include = @("manifest.json", "src", "vendor", "icons", "LICENSE")
+$include = @("manifest.json", "src", "vendor", "icons", "_locales", "LICENSE")
 foreach ($item in $include) {
     $src = Join-Path $root $item
     $dst = Join-Path $stage $item
