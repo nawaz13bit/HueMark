@@ -59,7 +59,7 @@ Productivity / Accessibility
   tool the user can invoke on any site or PDF they visit; there's no fixed
   set of domains to scope to.
 
-## Screenshots (in `screenshots/`, ready to upload)
+## Screenshots (in `screenshots/store/`, ready to upload — 1280x800, letterboxed via `scripts/resize-screenshots.ps1`)
 
 - `01-webpage-highlights-popup.png` — Wikipedia article with 6 terms
   highlighted in distinct colors, popup panel open showing the term/color
