@@ -53,9 +53,14 @@ cualquier página.
   resaltarse con ninguna extensión de navegador, HueMark incluido; su
   contenido se dibuja en un canvas, no como texto DOM real.
 
-**Search terms:** resaltar, resaltador de texto, resaltado multicolor,
-resaltador de palabras clave, resaltador de PDF, buscar y resaltar,
-resaltador de palabras
+**Search terms:**
+- resaltar (highlight)
+- resaltador de texto (text highlighter)
+- resaltado multicolor (multi-color highlight)
+- resaltador de palabras clave (keyword highlighter)
+- resaltador de PDF (PDF highlighter)
+- buscar y resaltar (find and highlight)
+- resaltador de palabras (word highlighter)
 
 ---
 
@@ -106,9 +111,14 @@ fils d'information sur n'importe quelle page.
   peuvent être surlignées par aucune extension de navigateur, HueMark
   compris ; leur contenu est dessiné sur un canvas, pas en texte DOM réel.
 
-**Search terms:** surligner, surligneur de texte, surlignage multicolore,
-surligneur de mots-clés, surligneur PDF, rechercher et surligner,
-surligneur de mots
+**Search terms:**
+- surligner (highlight)
+- surligneur de texte (text highlighter)
+- surlignage multicolore (multi-color highlight)
+- surligneur de mots-clés (keyword highlighter)
+- surligneur PDF (PDF highlighter)
+- rechercher et surligner (find and highlight)
+- surligneur de mots (word highlighter)
 
 ---
 
@@ -159,9 +169,14 @@ visuell zu verfolgen.
   Browser-Erweiterung markiert werden, auch nicht von HueMark — ihr
   Inhalt wird auf einem Canvas gezeichnet, nicht als echter DOM-Text.
 
-**Search terms:** markieren, texthervorhebung, mehrfarbige markierung,
-schlagwort-markierung, pdf-markierung, suchen und markieren,
-wort-markierung
+**Search terms:**
+- markieren (highlight)
+- texthervorhebung (text highlighter)
+- mehrfarbige markierung (multi-color highlight)
+- schlagwort-markierung (keyword highlighter)
+- pdf-markierung (PDF highlighter)
+- suchen und markieren (find and highlight)
+- wort-markierung (word highlighter)
 
 ---
 
@@ -209,9 +224,14 @@ HueMarkを使えば、複数の検索語を一度にそれぞれ別の色でハ�
   HueMarkを含むどのブラウザ拡張機能でもハイライトできません。これら
   のコンテンツは実際のDOMテキストではなくCanvasに描画されるためです。
 
-**Search terms:** ハイライト, テキストハイライター, マルチカラーハイラ
-イト, キーワードハイライター, PDFハイライター, 検索してハイライト,
-単語ハイライター
+**Search terms:**
+- ハイライト (highlight)
+- テキストハイライター (text highlighter)
+- マルチカラーハイライト (multi-color highlight)
+- キーワードハイライター (keyword highlighter)
+- PDFハイライター (PDF highlighter)
+- 検索してハイライト (find and highlight)
+- 単語ハイライター (word highlighter)
 
 ---
 
