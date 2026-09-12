@@ -55,9 +55,18 @@ Productivity / Accessibility
 - **declarativeNetRequest** — redirect PDF navigations to the bundled
   PDF.js viewer, since browsers don't allow third-party scripts inside
   their built-in PDF viewers.
-- **host permissions (`<all_urls>`)** — highlighting is a general-purpose
-  tool the user can invoke on any site or PDF they visit; there's no fixed
-  set of domains to scope to.
+- **host permissions (`<all_urls>`)** — HueMark is a general-purpose
+  highlighter with no fixed set of target domains: users add their own
+  search terms and expect them highlighted automatically on any page or
+  PDF they visit, including on page reload and revisit, and as new content
+  streams into dynamic pages (infinite scroll, chat apps, SPA navigation)
+  via a mutation observer. `activeTab` cannot cover this: it only grants
+  access after an explicit per-tab user gesture (e.g. clicking the toolbar
+  icon) and that grant does not persist across reloads or navigation, so
+  highlights would disappear and require a fresh click on every page load.
+  Broad host access is also required for `declarativeNetRequest` to
+  redirect PDF navigations to the bundled PDF.js viewer, since PDFs can be
+  hosted on any domain.
 
 ## Screenshots (in `screenshots/store/`, ready to upload — 1280x800, letterboxed via `scripts/resize-screenshots.ps1`)
 
