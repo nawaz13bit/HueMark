@@ -41,6 +41,20 @@ page.
   any browser extension, HueMark included — their content is drawn to a
   canvas, not real DOM text.
 
+## Full description (Firefox AMO variant)
+
+Same as above, except the Privacy bullet reads:
+
+**Privacy**
+- No data collection, no analytics, no external servers. Your search terms
+  and colors are stored locally in your browser and never leave your
+  device.
+
+(Genericized from the Chrome/Edge listing's `chrome.storage.local`
+wording — accurate for Firefox too since it aliases `chrome.*` to
+`browser.*`, but naming a Chrome-specific API in a Firefox store listing
+reads oddly to AMO users.)
+
 ## Category
 
 Productivity / Accessibility
@@ -105,6 +119,43 @@ colors, and settings are stored locally via `chrome.storage.local` and
 never transmitted anywhere. Source is public:
 https://github.com/nawaz13bit/HueMark
 
+## Notes to Reviewer (Firefox AMO)
+
+HueMark is a multi-color text/keyword highlighter for web pages and PDFs.
+No login, no account, no backend. Extension id: `huemark@fnawaz.dev`.
+
+Test: click the toolbar icon, add a term + color. Matches highlight
+immediately and persist across reload/nav. Open any http(s) .pdf, or
+"Open local PDF..." in the popup, to see terms highlighted in the
+bundled PDF.js viewer. Alt+Shift+Up/Down/Left/Right nav; Alt+Shift+B for
+a floating bar.
+
+`<all_urls>` + `declarativeNetRequest`: users pick their own terms and
+expect them highlighted on any site/PDF, incl. after reload (activeTab
+doesn't survive that) and via MutationObserver on dynamic pages; DNR
+redirects PDF navigations to the bundled viewer.
+
+No build step for HueMark's own code (`src/`, plain unbundled JS — the
+zip is the source). `vendor/pdfjs/` is Mozilla's PDF.js v6.3.289 generic
+dist build (their own bundling, readable, not minified). One deliberate
+patch in `web/viewer.mjs` (search `HueMark:` near line 20460): the
+upstream `validateFileURL` cross-origin guard is neutered. That guard
+stops a *hosted, embeddable* PDF.js viewer from being pointed by a
+third-party site at an arbitrary `?file=` URL (SSRF/XSS mitigation).
+HueMark's viewer is never hosted/embeddable — only reached via this
+extension's own `declarativeNetRequest` redirect, so the file's origin
+is always the page the user navigated to, making the guard a no-op here
+by design. Details in `vendor/pdfjs/README.md`.
+
+Linter warnings (6x "unsafe import", 1x "unsafe innerHTML") are
+unrelated, in unpatched `vendor/pdfjs/` code: PDF.js's own dynamic
+loading of its worker/sandbox/debug bundles and l10n templating, all
+resolving to bundled files/JSON, never remote/user data.
+
+Privacy: no data collection/analytics/remote servers. Terms/colors
+stored locally (Firefox aliases `chrome.*` to `browser.*`). Source:
+https://github.com/nawaz13bit/HueMark
+
 ## Screenshots (in `screenshots/store/`, ready to upload — 1280x800, letterboxed via `scripts/resize-screenshots.ps1`)
 
 - `01-webpage-highlights-popup.png` — Wikipedia article with 6 terms
@@ -135,6 +186,14 @@ https://github.com/nawaz13bit/HueMark/blob/main/PRIVACY.md
 (Required field on Chrome Web Store / Edge Add-ons for extensions with
 broad host permissions; also fill in the "no data collected" declarations
 in the store's Privacy Practices tab to match.)
+
+## Version notes (Firefox AMO submission form)
+
+Initial release (0.1.0). Multi-color text/keyword highlighter for web
+pages and PDFs, with a bundled PDF.js viewer, keyboard navigation
+between matches, persistent highlights across reload/revisit, and a
+colorblind-friendly palette option. No account, no backend, no data
+collection.
 
 ## Submission notes
 
