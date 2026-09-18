@@ -40,6 +40,9 @@ cualquier página.
   (Cmd+Shift+... en Mac).
 - Un contorno persistente marca tu coincidencia actual para no perder tu
   lugar al recorrer una página larga.
+- En Edge, es posible que debas asignar estos atajos manualmente la
+  primera vez: visita `edge://extensions/shortcuts` y configúralos allí
+  si no funcionan de forma predeterminada.
 
 **Privacidad**
 - Sin recopilación de datos, sin análisis, sin servidores externos. Tus
@@ -98,6 +101,10 @@ fils d'information sur n'importe quelle page.
   la souris : Alt+Maj+Haut/Bas/Gauche/Droite (Cmd+Maj+... sur Mac).
 - Un contour persistant marque votre correspondance actuelle pour ne
   jamais perdre votre position sur une longue page.
+- Sur Edge, il peut être nécessaire d'attribuer ces raccourcis
+  manuellement la première fois : rendez-vous sur
+  `edge://extensions/shortcuts` pour les configurer s'ils ne
+  fonctionnent pas par défaut.
 
 **Confidentialité**
 - Aucune collecte de données, aucune analyse, aucun serveur externe. Vos
@@ -156,6 +163,10 @@ visuell zu verfolgen.
   (Cmd+Umschalt+... auf dem Mac).
 - Ein bleibender Umriss markiert Ihren aktuellen Treffer, damit Sie beim
   Scannen einer langen Seite nie die Orientierung verlieren.
+- Unter Edge müssen diese Tastenkombinationen beim ersten Mal
+  möglicherweise manuell zugewiesen werden: Rufen Sie
+  `edge://extensions/shortcuts` auf und legen Sie sie dort fest, falls
+  sie nicht von selbst funktionieren.
 
 **Datenschutz**
 - Keine Datenerfassung, keine Analysen, keine externen Server. Ihre
@@ -211,6 +222,9 @@ HueMarkを使えば、複数の検索語を一度にそれぞれ別の色でハ�
   Alt+Shift+上/下/左/右（Macでは Cmd+Shift+...）。
 - 現在の一致箇所には常に枠線が表示されるため、長いページをスキャンして
   も自分の位置を見失いません。
+- Edgeでは、これらのショートカットを初回に手動で割り当てる必要がある
+  場合があります。標準で動作しない場合は `edge://extensions/shortcuts`
+  にアクセスして設定してください。
 
 **プライバシー**
 - データ収集なし、分析なし、外部サーバーなし。検索語と色はお使いのデバ
@@ -264,6 +278,9 @@ HueMark يتيح لك تمييز عدة مصطلحات بحث في وقت واح
 - انتقل إلى التطابق التالي/السابق وتنقل بين المصطلحات دون لمس الفأرة:
   Alt+Shift+سهم لأعلى/لأسفل/لليسار/لليمين (Cmd+Shift+... على Mac).
 - إطار ثابت يحدد تطابقك الحالي حتى لا تفقد مكانك أثناء تصفح صفحة طويلة.
+- في Edge، قد تحتاج إلى تعيين هذه الاختصارات يدويًا في المرة الأولى:
+  انتقل إلى `edge://extensions/shortcuts` واضبطها هناك إذا لم تعمل
+  تلقائيًا.
 
 **الخصوصية**
 - لا جمع بيانات، لا تحليلات، لا خوادم خارجية. تُخزَّن مصطلحات البحث
@@ -320,6 +337,9 @@ HueMark आपको एक साथ कई खोज शब्दों को
   Alt+Shift+ऊपर/नीचे/बाएं/दाएं (Mac पर Cmd+Shift+...)।
 - एक स्थायी आउटलाइन आपके वर्तमान मिलान को चिह्नित करता है ताकि लंबे पेज
   को स्कैन करते समय आप अपनी जगह न खोएं।
+- Edge में, इन शॉर्टकट्स को पहली बार मैन्युअल रूप से असाइन करना पड़ सकता
+  है: यदि ये अपने आप काम न करें तो `edge://extensions/shortcuts` पर
+  जाकर इन्हें सेट करें।
 
 **गोपनीयता**
 - कोई डेटा संग्रह नहीं, कोई एनालिटिक्स नहीं, कोई बाहरी सर्वर नहीं। आपके
@@ -376,6 +396,9 @@ visivamente più filoni di informazione su qualsiasi pagina.
   (Cmd+Maiusc+... su Mac).
 - Un contorno persistente segna la tua corrispondenza attuale, così non
   perdi mai il tuo punto mentre scorri una pagina lunga.
+- Su Edge, potrebbe essere necessario assegnare manualmente queste
+  scorciatoie la prima volta: visita `edge://extensions/shortcuts` e
+  impostale lì se non funzionano immediatamente.
 
 **Privacy**
 - Nessuna raccolta dati, nessuna analisi, nessun server esterno. I tuoi
@@ -431,6 +454,9 @@ HueMark를 사용하면 여러 검색어를 한 번에 각각 다른 색으로 �
   전환: Alt+Shift+위/아래/왼쪽/오른쪽(Mac에서는 Cmd+Shift+...).
 - 지속적인 윤곽선이 현재 일치 항목을 표시하여 긴 페이지를 스캔하는
   동안 위치를 잃지 않습니다.
+- Edge에서는 이러한 단축키를 처음에 수동으로 지정해야 할 수 있습니다.
+  기본적으로 작동하지 않으면 `edge://extensions/shortcuts`로 이동하여
+  설정하세요.
 
 **개인정보 보호**
 - 데이터 수집 없음, 분석 없음, 외부 서버 없음. 검색어와 색상은 기기에
@@ -487,6 +513,9 @@ informação em qualquer página.
   no Mac).
 - Um contorno persistente marca sua correspondência atual para que você
   nunca perca seu lugar ao percorrer uma página longa.
+- No Edge, pode ser necessário atribuir esses atalhos manualmente na
+  primeira vez: acesse `edge://extensions/shortcuts` e configure-os lá
+  se não funcionarem automaticamente.
 
 **Privacidade**
 - Sem coleta de dados, sem análises, sem servidores externos. Seus termos
@@ -545,6 +574,9 @@ HueMark позволяет подсвечивать несколько поис�
   (Cmd+Shift+... на Mac).
 - Постоянная обводка отмечает текущее совпадение, чтобы вы не теряли
   своё место при просмотре длинной страницы.
+- В Edge эти сочетания клавиш может потребоваться назначить вручную при
+  первом использовании: перейдите на `edge://extensions/shortcuts` и
+  настройте их там, если они не работают по умолчанию.
 
 **Конфиденциальность**
 - Никакого сбора данных, никакой аналитики, никаких внешних серверов.
@@ -598,6 +630,8 @@ HueMark 让你可以同时高亮多个搜索词，每个词使用自己的颜色
   Alt+Shift+上/下/左/右（Mac 上为 Cmd+Shift+...）。
 - 持续显示的轮廓会标记你当前的匹配项，让你在浏览长页面时不会迷失
   位置。
+- 在 Edge 中，这些快捷键可能需要在首次使用时手动分配：如果默认不
+  生效，请访问 `edge://extensions/shortcuts` 进行设置。
 
 **隐私**
 - 不收集数据，不进行分析，不使用外部服务器。你的搜索词和颜色仅保存在
@@ -650,6 +684,8 @@ HueMark 讓你可以同時標示多個搜尋詞，每個詞使用自己的顏色
   Alt+Shift+上/下/左/右（Mac 上為 Cmd+Shift+...）。
 - 持續顯示的外框會標示你目前的相符項目，讓你在瀏覽長頁面時不會迷失
   位置。
+- 在 Edge 中，這些快捷鍵可能需要在首次使用時手動指定：如果預設無法
+  運作，請造訪 `edge://extensions/shortcuts` 進行設定。
 
 **隱私**
 - 不收集資料、不進行分析、不使用外部伺服器。你的搜尋詞和顏色僅儲存在

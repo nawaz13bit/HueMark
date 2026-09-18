@@ -28,6 +28,9 @@ page.
   the mouse: Alt+Shift+Up / Down / Left / Right (Cmd+Shift+... on Mac).
 - A persistent outline marks your current match so you never lose your
   place while scanning a long page.
+- On Chrome, these shortcuts may need to be assigned manually the first
+  time: visit `chrome://extensions/shortcuts` and set them there if they
+  don't fire out of the box.
 
 **Privacy**
 - No data collection, no analytics, no external servers. Your search terms
@@ -100,7 +103,11 @@ How to test:
    PDF.js viewer.
 5. Alt+Shift+Up/Down jumps between matches; Alt+Shift+Left/Right cycles
    which term is active. A floating bar (Alt+Shift+B or the toolbar
-   command) offers the same controls without opening the popup.
+   command) offers the same controls without opening the popup. Note:
+   Chrome doesn't always auto-bind these `suggested_key` defaults for
+   unpacked/dev-mode-installed extensions with multiple custom commands —
+   if a shortcut doesn't fire, assign it manually at
+   `chrome://extensions/shortcuts`.
 
 Why broad host permissions (`<all_urls>`) are requested: HueMark has no
 fixed set of target sites — users choose their own search terms and
