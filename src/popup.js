@@ -14,6 +14,38 @@ function applyI18n() {
 }
 applyI18n();
 
+// Chrome/Edge don't always apply manifest suggested_key bindings (conflicts,
+// OS-level Alt+Shift layout switching), so when any HueMark command has no
+// shortcut assigned, point the user at the browser's shortcuts page instead
+// of leaving them with silently dead keys.
+async function initShortcutBanner() {
+  const banner = document.getElementById("shortcutBanner");
+  try {
+    if (!chrome.commands || !chrome.commands.getAll) return;
+    const { huemark_shortcut_hint_dismissed } = await chrome.storage.local.get("huemark_shortcut_hint_dismissed");
+    if (huemark_shortcut_hint_dismissed) return;
+    const commands = await chrome.commands.getAll();
+    if (!commands.some((c) => c.name.startsWith("huemark-") && !c.shortcut)) return;
+    banner.hidden = false;
+  } catch (err) {
+    console.warn("HueMark: shortcut check failed", err);
+    return;
+  }
+  document.getElementById("setShortcutsBtn").addEventListener("click", () => {
+    if (chrome.commands.openShortcutSettings) {
+      chrome.commands.openShortcutSettings(); // Firefox 137+
+    } else {
+      const scheme = navigator.userAgent.includes("Edg/") ? "edge" : "chrome";
+      chrome.tabs.create({ url: `${scheme}://extensions/shortcuts` });
+    }
+  });
+  document.getElementById("shortcutDismissBtn").addEventListener("click", () => {
+    banner.hidden = true;
+    chrome.storage.local.set({ huemark_shortcut_hint_dismissed: true });
+  });
+}
+initShortcutBanner();
+
 const termBoxes = document.getElementById("termBoxes");
 const enabledToggle = document.getElementById("enabledToggle");
 const wholeWordToggle = document.getElementById("wholeWordToggle");

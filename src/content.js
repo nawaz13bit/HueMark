@@ -114,6 +114,19 @@
         if (m.removedNodes.length > 0) pendingRemoval = true;
       } else if (m.type === "characterData") {
         pendingTextNodes.add(m.target);
+      } else if (m.type === "attributes") {
+        // A class/style/hidden toggle can be a container that was skipped as
+        // hidden at scan time (a lazy-rendered section, an accordion panel,
+        // content-visibility:auto) becoming visible with no childList or
+        // characterData change to trigger a rescan on its own. Only queue it
+        // when it now looks visible, so unrelated attribute churn (hover/
+        // active state classes etc.) on already-visible or still-hidden
+        // elements doesn't force a subtree walk for nothing.
+        const el = m.target;
+        const visibleNow = typeof el.checkVisibility === "function"
+          ? el.checkVisibility({ checkOpacity: false, checkVisibilityCSS: true })
+          : true;
+        if (visibleNow) pendingRoots.add(el);
       }
     }
   }
@@ -165,7 +178,13 @@
       clearTimeout(debounceHandle);
       debounceHandle = setTimeout(runIncrementalHighlight, 150);
     });
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["style", "class", "hidden", "aria-hidden", "open"]
+    });
   }
 
   // ---------------------------------------------------------------------

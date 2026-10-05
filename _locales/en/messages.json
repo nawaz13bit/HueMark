@@ -67,6 +67,18 @@
     "message": "Not now, hide until next time",
     "description": "Title/tooltip for the button that dismisses the donate link."
   },
+  "popupShortcutsMissing": {
+    "message": "Keyboard shortcuts aren't set up yet.",
+    "description": "Popup banner shown when one or more HueMark keyboard shortcuts have no key assigned."
+  },
+  "popupShortcutsSet": {
+    "message": "Set shortcuts",
+    "description": "Button in the popup banner that opens the browser's extension shortcuts page."
+  },
+  "popupShortcutsDismiss": {
+    "message": "Don't show this again",
+    "description": "Title/tooltip for the button that permanently hides the shortcuts banner."
+  },
   "termAddAnother": {
     "message": "Add another word",
     "description": "Tooltip for the + button that adds another search term."
