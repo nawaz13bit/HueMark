@@ -306,6 +306,45 @@ footer {
   margin-top: 6px;
 }
 
+.shortcut-banner[hidden] {
+  display: none;
+}
+
+.shortcut-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.shortcut-banner span {
+  flex: 1;
+}
+
+.shortcut-banner #setShortcutsBtn {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 999px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.shortcut-banner #setShortcutsBtn:hover {
+  color: #fff;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
 .donate-row[hidden] {
   display: none;
 }
