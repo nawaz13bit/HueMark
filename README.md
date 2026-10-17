@@ -18,6 +18,12 @@ at once, each in its own color, across:
 - **Colorblind-friendly palette** — toggle an alternate palette tuned for
   colorblind accessibility.
 
+## Install
+
+- [Chrome Web Store](https://chromewebstore.google.com/detail/huemark-multi-word-highli/fjdhpkmgpfpdaadlennclaecfbeomelf)
+- [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/huemark-multiword-high/kgfekpgoffpafdpopoeelmcnjdpgiakc)
+- [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/huemark-multi-word-highlighter)
+
 ## Status: MVP
 
 What works today: any page whose text lives in the real DOM (which is the
