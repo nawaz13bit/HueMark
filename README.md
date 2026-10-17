@@ -18,6 +18,16 @@ at once, each in its own color, across:
 - **Colorblind-friendly palette** — toggle an alternate palette tuned for
   colorblind accessibility.
 
+## Demo
+
+On a web page:
+
+![HueMark highlighting terms on a web page](screenshots/02-demo-web.gif)
+
+In a PDF:
+
+![HueMark highlighting terms in a PDF](screenshots/03-demo-pdf.gif)
+
 ## Install
 
 - [Chrome Web Store](https://chromewebstore.google.com/detail/huemark-multi-word-highli/fjdhpkmgpfpdaadlennclaecfbeomelf)
