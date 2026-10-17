@@ -350,7 +350,8 @@ footer {
 }
 
 .donate-row {
-  display: inline-flex;
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 6px;
   margin-top: 8px;
