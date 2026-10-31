@@ -143,7 +143,7 @@ doesn't survive that) and via MutationObserver on dynamic pages; DNR
 redirects PDF navigations to the bundled viewer.
 
 No build step for HueMark's own code (`src/`, plain unbundled JS — the
-zip is the source). `vendor/pdfjs/` is Mozilla's PDF.js v6.3.289 generic
+zip is the source). `vendor/pdfjs/` is Mozilla's PDF.js v6.4.299 generic
 dist build (their own bundling, readable, not minified). One deliberate
 patch in `web/viewer.mjs` (search `HueMark:` near line 20460): the
 upstream `validateFileURL` cross-origin guard is neutered. That guard
