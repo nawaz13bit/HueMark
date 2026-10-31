@@ -980,6 +980,8 @@
     arr.forEach((el) => scrollObserver.observe(el));
   }
 
+  let exportRunning = false;
+
   function loadStateAndRun() {
     chrome.storage.local.get(
       ["huemark_terms", "huemark_options", "huemark_bar_position"],
@@ -1044,8 +1046,11 @@
       // response: the popup that asked may be closed long before a big PDF
       // finishes, and the background keeps the result until the popup returns.
       sendResponse({ started: true });
+      if (exportRunning) return; // a second request while one is collecting would interleave PDF stepping
+      exportRunning = true;
       const names = msg.names || [];
       const finish = (data) => {
+        exportRunning = false;
         try { chrome.runtime.sendMessage({ type: "huemark:exportDone", data, names }, () => void chrome.runtime.lastError); } catch (_) {}
       };
       try { chrome.runtime.sendMessage({ type: "huemark:exportBegin" }, () => void chrome.runtime.lastError); } catch (_) {}
