@@ -1,6 +1,6 @@
 # Vendored PDF.js
 
-Source: PDF.js **6.3.289**, generic (non-Firefox) dist build. Apache-2.0, see `LICENSE`.
+Source: PDF.js **6.4.299**, generic (non-Firefox) dist build. Apache-2.0, see `LICENSE`.
 
 ## Trim from upstream dist
 
@@ -13,6 +13,8 @@ Only what the viewer needs at runtime is kept:
 ## Patches applied to `web/viewer.mjs`
 
 1. **`validateFileURL` neutered** (search for `HueMark:` comment near the function). Upstream throws if the `?file=` URL's origin doesn't match the viewer's own origin — a guard meant for the *hosted*, publicly-embeddable PDF.js viewer (stops third-party sites from pointing it at an arbitrary cross-origin URL, an SSRF/XSS mitigation). HueMark's viewer is never hosted or embeddable that way: it's only reachable via `background.js`'s own `declarativeNetRequest` redirect, and by design the PDF's origin is always different from the extension's origin (it's whatever site the user navigated to). The function body was replaced with a no-op.
+
+2. **`web/viewer.html`**: CSP relaxed to `style-src 'self' 'unsafe-inline'` and `connect-src * file: blob: data:`, plus the HueMark `<script>` block before `</body>`. The viewer's toolbar and menus are stock; HueMark adds nothing to them.
 
 ## Re-vendoring
 
