@@ -8,6 +8,81 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 });
 
+// Right-click "add selection to HueMark". Mirrors popup.js's palettes and
+// 6-term cap; the new term gets the first palette color no term uses yet.
+const CONTEXT_MENU_ID = "huemark-add-selection";
+const MAX_TERMS = 6;
+const MAX_SELECTION_LENGTH = 200;
+const STANDARD_PALETTE = ["#ffeb3b", "#8bc34a", "#4fc3f7", "#f48fb1", "#ffab40", "#ce93d8"];
+const COLORBLIND_PALETTE = ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#D55E00", "#CC79A7"];
+
+function createContextMenu() {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: CONTEXT_MENU_ID,
+      title: chrome.i18n.getMessage("contextMenuAdd"),
+      contexts: ["selection"]
+    });
+  });
+}
+
+chrome.runtime.onInstalled.addListener(createContextMenu);
+chrome.runtime.onStartup.addListener(createContextMenu);
+
+// Terms treat * ? \ and a /.../ wrapper as syntax, so a selection containing
+// them must be escaped to stay the literal text the user selected.
+function selectionToTerm(raw) {
+  const text = raw.trim().replace(/\s+/g, " ").slice(0, MAX_SELECTION_LENGTH).trim();
+  if (!text) return "";
+  return text.replace(/[\\*?]/g, "\\$&").replace(/^\/(.+)\/$/, "\\/$1\\/");
+}
+
+let badgeHandle = null;
+function flashBadge(text) {
+  chrome.action.setBadgeText({ text });
+  clearTimeout(badgeHandle);
+  badgeHandle = setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2500);
+}
+
+// A running or finished export outlives the popup that started it: the popup
+// reads this on open and offers the copy (a clipboard write needs a click).
+// Session storage keeps the match text off disk where the browser has it.
+const EXPORT_KEY = "huemark_export";
+const exportStore = chrome.storage.session || chrome.storage.local;
+function setExportBadge(text, color) {
+  clearTimeout(badgeHandle);
+  chrome.action.setBadgeBackgroundColor({ color });
+  chrome.action.setBadgeText({ text });
+}
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  const stored = (await exportStore.get(EXPORT_KEY))[EXPORT_KEY];
+  if (stored?.state === "running" && stored.tabId === tabId) {
+    exportStore.remove(EXPORT_KEY);
+    chrome.action.setBadgeText({ text: "" });
+  }
+});
+
+chrome.contextMenus.onClicked.addListener(async (info) => {
+  if (info.menuItemId !== CONTEXT_MENU_ID || !info.selectionText) return;
+  const term = selectionToTerm(info.selectionText);
+  if (!term) return;
+
+  const data = await chrome.storage.local.get(["huemark_terms", "huemark_options"]);
+  const terms = data.huemark_terms || [];
+  const filled = terms.filter((t) => t.term && t.term.trim());
+  if (filled.some((t) => t.term.trim().toLowerCase() === term.toLowerCase())) return; // already highlighted
+  if (filled.length >= MAX_TERMS) {
+    flashBadge("!");
+    return;
+  }
+
+  const palette = data.huemark_options?.colorblind ? COLORBLIND_PALETTE : STANDARD_PALETTE;
+  const used = new Set(filled.map((t) => t.color.toLowerCase()));
+  const color = palette.find((c) => !used.has(c.toLowerCase())) || palette[filled.length % palette.length];
+  await chrome.storage.local.set({ huemark_terms: [...filled, { term, color }] });
+});
+
 // Redirect top-level navigation to a .pdf URL into HueMark's own bundled
 // PDF.js viewer instead of the browser's built-in one, so highlighter.js/
 // content.js can run against a real text layer we control. The browser's
@@ -20,6 +95,8 @@ chrome.runtime.onInstalled.addListener(async () => {
 // the same regexSubstitution dynamic-rule redirect syntax as Chrome, so
 // this runs on both.
 const PDF_REDIRECT_RULE_ID = 1;
+// arXiv serves PDFs at /pdf/<id> with no .pdf suffix, which the generic rule can't see.
+const ARXIV_PDF_RULE_ID = 2;
 
 async function setupPdfRedirect() {
   const viewerUrl = chrome.runtime.getURL("vendor/pdfjs/web/viewer.html");
@@ -34,8 +111,18 @@ async function setupPdfRedirect() {
 
 async function registerPdfRedirectRule(viewerUrl) {
   await chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: [PDF_REDIRECT_RULE_ID],
+    removeRuleIds: [PDF_REDIRECT_RULE_ID, ARXIV_PDF_RULE_ID],
     addRules: [
+      {
+        id: ARXIV_PDF_RULE_ID,
+        priority: 1,
+        action: { type: "redirect", redirect: { regexSubstitution: `${viewerUrl}?file=\\0` } },
+        condition: {
+          // new-style (2101.00001, 2101.00001v2) and old-style (hep-th/9901001) ids
+          regexFilter: "^https://(www\\.)?arxiv\\.org/pdf/[A-Za-z.\\-]*/?[0-9]{4,7}(\\.[0-9]{4,5})?(v[0-9]+)?(\\?[^#]*)?(#.*)?$",
+          resourceTypes: ["main_frame"]
+        }
+      },
       {
         id: PDF_REDIRECT_RULE_ID,
         priority: 1,
@@ -65,6 +152,10 @@ async function registerPdfRedirectRule(viewerUrl) {
 
 chrome.runtime.onInstalled.addListener(setupPdfRedirect);
 chrome.runtime.onStartup.addListener(setupPdfRedirect);
+// Also re-register whenever the worker spins up (idempotent: remove + add). An unpacked
+// reload, a cleared rule store or a missed onInstalled would otherwise leave PDFs opening
+// in the browser's own viewer until the next browser restart.
+setupPdfRedirect();
 
 // declarativeNetRequest can't redirect file:// navigations (see comment
 // above), so local PDFs are caught here instead: watch for a tab finishing
@@ -98,7 +189,79 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse(entry || null);
     return;
   }
+  if (message?.type === "huemark:exportBegin" && sender.tab && sender.frameId === 0) {
+    exportStore.set({ [EXPORT_KEY]: { state: "running", tabId: sender.tab.id } });
+    setExportBadge("…", "#888888");
+    return;
+  }
+  if (message?.type === "huemark:exportDone" && sender.tab && sender.frameId === 0) {
+    const data = message.data;
+    const total = data ? data.rows.length + (data.frames || []).reduce((n, f) => n + f.rows.length, 0) : 0;
+    const state = !data ? "failed" : total === 0 && !data.scanned ? "none" : "ready";
+    exportStore.set({ [EXPORT_KEY]: { state, tabId: sender.tab.id, data: state === "ready" ? data : null, names: message.names || [] } });
+    setExportBadge(state === "ready" ? "✓" : "!", state === "ready" ? "#2e7d32" : "#c62828");
+    return;
+  }
+  if (message?.type === "huemark:exportClear") {
+    exportStore.remove(EXPORT_KEY);
+    chrome.action.setBadgeText({ text: "" });
+    return;
+  }
+  if (sender.tab && typeof message?.type === "string" && message.type.startsWith("huemark:frame")) {
+    handleFrameRelay(message, sender.tab.id).then(sendResponse);
+    return true;
+  }
+  if (message?.type === "huemark:subChanged" && sender.tab) {
+    // An iframe's match count changed: let the top frame refresh its totals.
+    chrome.tabs.sendMessage(sender.tab.id, { type: "huemark:subChanged" }, { frameId: 0 },
+      () => void chrome.runtime.lastError);
+    return;
+  }
 });
+
+// The top frame's view of the page's iframes. Frames can't message each other,
+// so content.js asks here and these run the matching window.__huemarkApi
+// method inside the iframes (same isolated world as the content scripts).
+const FRAME_API_METHODS = new Set(["counts", "focus", "clearCurrent", "export"]);
+
+async function runInFrames(tabId, target, method, args) {
+  if (!FRAME_API_METHODS.has(method)) return [];
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId, ...target },
+      func: (m, a) => {
+        const api = window.__huemarkApi;
+        return api && typeof api[m] === "function" ? api[m](...a) : null;
+      },
+      args: [method, args],
+    });
+    return results
+      .filter((r) => r.frameId !== 0 && r.result != null)
+      .map((r) => ({ frameId: r.frameId, result: r.result }));
+  } catch {
+    return []; // tab navigated away or a frame is not scriptable
+  }
+}
+
+async function handleFrameRelay(message, tabId) {
+  const all = { allFrames: true };
+  if (message.type === "huemark:frameCounts") {
+    const keys = Array.isArray(message.keys) ? message.keys.filter((k) => typeof k === "string") : [];
+    return runInFrames(tabId, all, "counts", [keys]);
+  }
+  if (message.type === "huemark:frameClear") {
+    return runInFrames(tabId, all, "clearCurrent", []);
+  }
+  if (message.type === "huemark:frameExport") {
+    return runInFrames(tabId, all, "export", []);
+  }
+  if (message.type === "huemark:frameFocus") {
+    if (typeof message.key !== "string" || !Number.isInteger(message.idx) || !Number.isInteger(message.frameId)) return [];
+    await runInFrames(tabId, all, "clearCurrent", []);
+    return runInFrames(tabId, { frameIds: [message.frameId] }, "focus", [message.key, message.idx]);
+  }
+  return [];
+}
 
 // frameId: 0 - only the top-level frame runs the bar/nav state content.js
 // tracks; see the matching comment in popup.js's trySendMessage.
@@ -125,7 +288,7 @@ async function injectContentScript(tabId) {
   try {
     await chrome.scripting.executeScript({
       target: { tabId, frameIds: [0] },
-      files: ["src/highlighter.js", "src/content.js"],
+      files: ["src/highlighter.js", "src/exporter.js", "src/content.js"],
     });
     return true;
   } catch {

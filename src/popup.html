@@ -10,8 +10,8 @@
   <header>
     <h1>HueMark</h1>
     <label class="toggle">
-      <input type="checkbox" id="enabledToggle" checked />
       <span data-i18n="popupEnabled">Enabled</span>
+      <input type="checkbox" id="enabledToggle" class="switch" role="switch" checked />
     </label>
   </header>
 
@@ -31,18 +31,79 @@
     <span data-i18n="popupColorblind">Colorblind-friendly palette</span>
   </label>
 
-  <button id="openLocalPdfBtn" type="button" data-i18n="popupOpenLocalPdf">Open local PDF...</button>
-  <input type="file" id="localPdfInput" accept="application/pdf" hidden />
+  <button id="openLocalPdfBtn" type="button" data-i18n="popupOpenPdfViewer">Open PDF viewer</button>
+
+  <div class="lists-row">
+    <select id="listSelect"></select>
+    <button id="listSaveBtn" class="pill-btn" type="button" data-i18n="listsSave">Save</button>
+    <button id="listDeleteBtn" class="pill-btn" type="button" data-i18n="listsDelete" disabled>Delete</button>
+  </div>
+  <div id="listNameRow" class="lists-row" hidden>
+    <input id="listNameInput" type="text" maxlength="40" data-i18n="listsNamePlaceholder" data-i18n-attr="placeholder" placeholder="List name" />
+    <button id="listNameOk" class="pill-btn" type="button">✓</button>
+  </div>
 
   <div id="termBoxes"></div>
 
+  <div class="export-opts">
+    <label class="export-mode">
+      <span data-i18n="popupExportPreset">Format</span>
+      <select id="exportPreset">
+        <option value="matches" data-i18n="exportPresetMatches">Matches</option>
+        <option value="citation" data-i18n="exportPresetCitation">Citation</option>
+        <option value="research" data-i18n="exportPresetResearch">Research</option>
+        <option value="resume" data-i18n="exportPresetResume">Resume</option>
+      </select>
+    </label>
+    <label class="export-mode" id="exportStyleRow" hidden>
+      <span data-i18n="popupExportStyle">Style</span>
+      <select id="exportStyle">
+        <option value="apa">APA</option>
+        <option value="mla">MLA</option>
+        <option value="chicago">Chicago</option>
+        <option value="harvard">Harvard</option>
+        <option value="ieee">IEEE</option>
+        <option value="vancouver">Vancouver</option>
+        <option value="ama">AMA</option>
+        <option value="bluebook">Bluebook</option>
+        <option value="plain" data-i18n="exportStylePlain">Plain</option>
+      </select>
+    </label>
+    <label class="export-mode">
+      <span data-i18n="popupExportMode">Extract</span>
+      <select id="exportMode">
+        <option value="snippet" data-i18n="exportModeSnippet">Snippet</option>
+        <option value="sentence" data-i18n="exportModeSentence">Sentence</option>
+        <option value="paragraph" data-i18n="exportModeParagraph">Paragraph</option>
+      </select>
+    </label>
+    <div id="exportClubRow" class="export-club" hidden>
+      <label>
+        <input type="checkbox" id="exportClub" checked />
+        <span data-i18n="popupExportClub">Club passages with several terms under one header</span>
+      </label>
+      <button id="exportClubInfoBtn" class="info-btn" type="button" aria-expanded="false" aria-controls="exportClubInfo"
+        data-i18n="exportClubInfoLabel" data-i18n-attr="title" title="Why club them?">!</button>
+    </div>
+    <p id="exportClubInfo" class="hint" hidden data-i18n="exportClubInfo">A paragraph or sentence that contains several of your terms is listed once, under a header such as "cat + dog", instead of being repeated under each term. Nothing is duplicated, the totals stay honest, and the "cat + dog" section shows where your terms appear together. Untick this to repeat the passage under every term it contains.</p>
+  </div>
+  <button id="exportBtn" type="button" data-i18n="popupExportBtn">Copy matches</button>
+  <p id="exportHint" role="status" hidden data-i18n="exportHint">Reading the page… you can close this popup. The toolbar icon shows ✓ when it's ready; keep the tab open.</p>
   <button id="clearAllBtn" type="button" data-i18n="popupClearAll">Clear all</button>
 
   <footer>
     <p class="hint" data-i18n="popupHintPersist">Highlights persist across reloads and update as new content loads on the page.</p>
     <details class="pdf-help">
-      <summary data-i18n="popupPdfHelpTitle">Local PDF help</summary>
-      <p class="hint" data-i18n="popupHintLocalPdf">On Chrome/Edge, local PDFs also open automatically if you enable "Allow access to file URLs" for HueMark in your browser's extension settings - Firefox blocks this for extensions, so use "Open local PDF..." above instead. On Firefox, that button opens the PDF viewer tab; click its own "Open File" button there to pick your PDF.</p>
+      <summary data-i18n="popupPdfHelpTitleV">PDF help</summary>
+      <p class="hint" data-i18n="popupHintPdfViewer">"Open PDF viewer" opens a tab where you can open a PDF file from your computer with the viewer's Open File button. PDFs opened from web links load in this viewer automatically; for PDFs already on your computer, enable "Allow access to file URLs" for HueMark in the browser's extension settings (Chrome/Edge).</p>
+    </details>
+    <details class="pdf-help" id="exportHelp">
+      <summary data-i18n="popupExportHelpTitle">Export help</summary>
+      <p class="hint" data-i18n="popupHintExportHelp">Format: Matches lists every hit. Citation adds a formatted reference (APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA, Bluebook or Plain) and an in-text citation after each quote. Research adds the author, date, source and section for each passage. Resume shows which terms were found, with counts, and where.</p>
+    </details>
+    <details class="pdf-help" id="listsHelp">
+      <summary data-i18n="popupListsHelpTitle">Saved lists help</summary>
+      <p class="hint" data-i18n="popupHintListsHelp">Save your current terms under a name to reuse them later. You can keep up to 10 lists; click Delete twice to remove one and make room for another.</p>
     </details>
     <span id="donateRow" class="donate-row" hidden>
       <a id="donateLink" class="donate-link" href="https://github.com/sponsors/nawaz13bit" target="_blank" rel="noopener" data-i18n="popupDonateLink">☕ Support this extension</a>
@@ -51,6 +112,7 @@
   </footer>
 
   <script src="donate.js"></script>
+  <script src="exporter.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
