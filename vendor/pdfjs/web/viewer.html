@@ -1237,7 +1237,7 @@ See https://github.com/adobe-type-tools/cmap-resources
          Loaded as plain scripts (not modules) so window.__huemark stays
          accessible the same way it does on normal pages.
 
-         These three tags are the ONLY thing that wires HueMark into the PDF
+         These tags are the ONLY thing that wires HueMark into the PDF
          viewer - manifest.json's content_scripts can't reach chrome-extension://
          pages, so there's no other injection path. They are hand-added here
          and are NOT tracked by manifest.json (content_scripts or
@@ -1247,6 +1247,7 @@ See https://github.com/adobe-type-tools/cmap-resources
          anywhere. Re-add this block after any PDF.js upgrade. -->
     <script src="../../../src/pdf-picker.js"></script>
     <script src="../../../src/highlighter.js"></script>
+    <script src="../../../src/exporter.js"></script>
     <script src="../../../src/content.js"></script>
   </body>
 </html>
