@@ -63,6 +63,16 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   }
 });
 
+// A reload or navigation kills the collecting page script: don't leave the popup on "Working".
+chrome.tabs.onUpdated.addListener(async (tabId, change) => {
+  if (change.status !== "loading") return;
+  const stored = (await exportStore.get(EXPORT_KEY))[EXPORT_KEY];
+  if (stored?.state === "running" && stored.tabId === tabId) {
+    exportStore.remove(EXPORT_KEY);
+    chrome.action.setBadgeText({ text: "" });
+  }
+});
+
 chrome.contextMenus.onClicked.addListener(async (info) => {
   if (info.menuItemId !== CONTEXT_MENU_ID || !info.selectionText) return;
   const term = selectionToTerm(info.selectionText);
@@ -198,8 +208,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const data = message.data;
     const total = data ? data.rows.length + (data.frames || []).reduce((n, f) => n + f.rows.length, 0) : 0;
     const state = !data ? "failed" : total === 0 && !data.scanned ? "none" : "ready";
-    exportStore.set({ [EXPORT_KEY]: { state, tabId: sender.tab.id, data: state === "ready" ? data : null, names: message.names || [] } });
-    setExportBadge(state === "ready" ? "✓" : "!", state === "ready" ? "#2e7d32" : "#c62828");
+    const tabId = sender.tab.id;
+    const entry = { state, tabId, data: state === "ready" ? data : null, names: message.names || [] };
+    const failed = { state: "failed", tabId, data: null, names: message.names || [] };
+    // A very large result can exceed the storage quota: report failure instead of staying on "running".
+    Promise.resolve().then(() => exportStore.set({ [EXPORT_KEY]: entry }))
+      .then(() => setExportBadge(state === "ready" ? "✓" : "!", state === "ready" ? "#2e7d32" : "#c62828"))
+      .catch(() => {
+        exportStore.set({ [EXPORT_KEY]: failed }).catch(() => {});
+        setExportBadge("!", "#c62828");
+      });
     return;
   }
   if (message?.type === "huemark:exportClear") {

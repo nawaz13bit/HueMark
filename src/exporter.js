@@ -151,7 +151,7 @@
         const first = document.createTreeWalker(m, NodeFilter.SHOW_TEXT).nextNode();
         rawStart = first ? model.starts.get(first) : undefined;
       }
-      if (rawStart === undefined) continue;
+      if (rawStart === undefined || !m.textContent) continue;
       const rawEnd = rawStart + m.textContent.length;
       const start = model.map[rawStart];
       const end = Math.max(start + 1, model.map[Math.min(rawEnd, model.map.length - 1)]);
@@ -161,7 +161,8 @@
         ...snippet(model.text, start, stop), ...blockRef(blocks, model, start, stop),
       };
       // Navigation, sidebars, reference and "similar articles" lists: not the document's own words.
-      const host = m.range ? m.range.startContainer.parentElement : m;
+      // parentElement is null for text sitting directly under a shadow root.
+      const host = (m.range ? m.range.startContainer.parentElement : m) || block;
       if (host.closest(AUX) || AUX_HEADING.test(row.heading) || isLabelOrLinkList(host, block, model.text)) row.aux = 1;
       rows.push(row);
     }
@@ -440,6 +441,8 @@
     const marks = window.__huemark.queryMarks().filter((m) => !scope || scope.contains(m.node || m));
     const blocks = [];
     const rows = pdf ? collectPdf(marks, blocks) : collectWeb(marks, blocks);
+    // Highlights exist but none could be located: the text layers have no layout (hidden tab). Say so, not "no matches".
+    if (pdf && marks.length && !rows.length) throw new Error("PDF text layout unavailable");
     const hasText = pdf ? !!document.querySelector("#viewer .textLayer span") : true;
     const meta = pdf ? await pdfMeta() : webMeta();
     return {
@@ -1006,7 +1009,12 @@
       }
       if (c === "<") {
         const j = s.indexOf(">", i + 1);
-        if (j > i) { const u = s.slice(i + 1, j); out += `<a href="${htmlEsc(u)}">${htmlEsc(u)}</a>`; i = j; continue; }
+        if (j > i) {
+          const u = s.slice(i + 1, j);
+          // Only real web/file addresses become links (no javascript:, data:, ...).
+          out += /^(?:https?|file):/i.test(u) ? `<a href="${htmlEsc(u)}">${htmlEsc(u)}</a>` : htmlEsc(u);
+          i = j; continue;
+        }
       }
       out += htmlEsc(c);
     }
