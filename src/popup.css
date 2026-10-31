@@ -1,4 +1,6 @@
 * { box-sizing: border-box; }
+/* A class that sets display (flex/grid) would otherwise override the hidden attribute. */
+[hidden] { display: none !important; }
 
 :root {
   color-scheme: light dark;
@@ -54,10 +56,47 @@ h1 {
   margin: 0;
 }
 
+input.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 30px;
+  height: 17px;
+  margin: 0;
+  border-radius: 9px;
+  background: var(--text-muted);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+input.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  transition: inset-inline-start 0.15s;
+}
+input.switch:checked {
+  background: var(--accent);
+  opacity: 1;
+}
+input.switch:checked::after {
+  inset-inline-start: 15px;
+}
+input.switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .toggle {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: 12px;
   color: var(--text-muted);
 }
@@ -69,6 +108,60 @@ h1 {
   font-size: 12px;
   margin-bottom: 10px;
   color: var(--text-muted);
+}
+
+.lists-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.lists-row[hidden] {
+  display: none;
+}
+
+.lists-row select,
+.lists-row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--box-bg);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.lists-row input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.pill-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--box-bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pill-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pill-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#listDeleteBtn.confirming {
+  border-color: var(--remove-hover);
+  color: var(--remove-hover);
 }
 
 #termBoxes {
@@ -246,6 +339,7 @@ h1 {
 }
 
 #clearAllBtn,
+#exportBtn,
 #openLocalPdfBtn {
   width: 100%;
   padding: 6px 10px;
@@ -262,7 +356,100 @@ h1 {
 }
 
 #clearAllBtn {
+  margin-top: 6px;
+}
+
+#exportBtn {
+  margin-top: 6px;
+}
+
+.export-opts {
   margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.export-mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.export-mode select {
+  flex: 1;
+  max-width: 60%;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--box-bg);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.export-club {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.export-club[hidden],
+#exportStyleRow[hidden],
+#exportClubInfo[hidden] {
+  display: none;
+}
+
+.export-club label {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.info-btn {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info-btn:hover,
+.info-btn[aria-expanded="true"] {
+  border-color: var(--accent);
+}
+
+#exportClubInfo {
+  margin: 6px 0 0;
+}
+
+#exportBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#exportBtn:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+#exportHint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--accent);
+}
+
+#exportHint[hidden] {
+  display: none;
 }
 
 #clearAllBtn:hover {

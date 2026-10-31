@@ -48,8 +48,7 @@ initShortcutBanner();
 
 const termBoxes = document.getElementById("termBoxes");
 const enabledToggle = document.getElementById("enabledToggle");
-const wholeWordToggle = document.getElementById("wholeWordToggle");
-const colorblindToggle = document.getElementById("colorblindToggle");
+const wholeWordToggle = document.getElementById("wholeWordToggle");const colorblindToggle = document.getElementById("colorblindToggle");
 const clearAllBtn = document.getElementById("clearAllBtn");
 
 const STANDARD_PALETTE = ["#ffeb3b", "#8bc34a", "#4fc3f7", "#f48fb1", "#ffab40", "#ce93d8"];
@@ -70,8 +69,16 @@ function nextColor() {
   return activePalette()[terms.length];
 }
 
+// Saved term lists: copies of the term set that can be loaded back in. The
+// active terms (huemark_terms) stay the single source the content script
+// reads - loading a list just replaces them.
+let lists = []; // { id, name, terms: [{ term, color }] }
+let activeListId = null; // the list last loaded/saved, for the "modified" dot
+
 async function loadState() {
-  const data = await chrome.storage.local.get(["huemark_terms", "huemark_options"]);
+  const data = await chrome.storage.local.get(["huemark_terms", "huemark_options", "huemark_lists", "huemark_active_list"]);
+  lists = data.huemark_lists || [];
+  activeListId = data.huemark_active_list || null;
   terms = (data.huemark_terms || []).map((t) => ({ ...t }));
   options = { enabled: true, wholeWord: false, colorblind: false, ...(data.huemark_options || {}) };
 }
@@ -98,8 +105,129 @@ function remapColorsToActivePalette() {
 
 function saveTermsNow() {
   chrome.storage.local.set({ huemark_terms: terms.filter((t) => t.term.trim().length > 0) });
+  renderLists();
   scheduleCountRefresh();
 }
+
+const listSelect = document.getElementById("listSelect");
+const listSaveBtn = document.getElementById("listSaveBtn");
+const listDeleteBtn = document.getElementById("listDeleteBtn");
+const listNameRow = document.getElementById("listNameRow");
+const listNameInput = document.getElementById("listNameInput");
+const listNameOk = document.getElementById("listNameOk");
+
+function currentListTerms() {
+  return terms.filter((t) => t.term.trim().length > 0).map((t) => ({ term: t.term, color: t.color }));
+}
+
+function persistLists() {
+  return chrome.storage.local.set({ huemark_lists: lists, huemark_active_list: activeListId });
+}
+
+function renderLists() {
+  if (activeListId && !lists.some((l) => l.id === activeListId)) activeListId = null;
+  const active = lists.find((l) => l.id === activeListId);
+  const dirty = active && JSON.stringify(currentListTerms()) !== JSON.stringify(active.terms);
+  listSelect.innerHTML = "";
+  listSelect.add(new Option(chrome.i18n.getMessage("listsPlaceholder"), ""));
+  lists.forEach((l) => {
+    const mark = l === active && dirty ? " •" : "";
+    listSelect.add(new Option(`${l.name} (${l.terms.length})${mark}`, l.id));
+  });
+  listSelect.value = active ? active.id : "";
+  listDeleteBtn.disabled = !active;
+  resetDeleteConfirm();
+}
+
+// Loading replaces the active terms with the list's copy.
+function loadList(id) {
+  const list = lists.find((l) => l.id === id);
+  activeListId = list ? list.id : null;
+  chrome.storage.local.set({ huemark_active_list: activeListId });
+  if (!list) return renderLists();
+  terms = list.terms.map((t) => ({ ...t }));
+  remapColorsToActivePalette();
+  ensureTrailingEmptyBox();
+  render();
+  saveTermsNow();
+}
+
+// Overwriting an existing list by name is always allowed; only a new list is
+// refused once the cap is hit. Returns false when the save was refused.
+const MAX_LISTS = 10;
+
+function saveCurrentAsList(name) {
+  const saved = currentListTerms();
+  name = name.trim();
+  if (!name || saved.length === 0) return true;
+  let list = lists.find((l) => l.name.toLowerCase() === name.toLowerCase());
+  if (list) {
+    list.terms = saved;
+  } else {
+    if (lists.length >= MAX_LISTS) return false;
+    list = { id: crypto.randomUUID(), name, terms: saved };
+    lists.push(list);
+  }
+  activeListId = list.id;
+  persistLists();
+  renderLists();
+  return true;
+}
+
+let deleteConfirmHandle = null;
+function resetDeleteConfirm() {
+  clearTimeout(deleteConfirmHandle);
+  listDeleteBtn.classList.remove("confirming");
+  listDeleteBtn.textContent = chrome.i18n.getMessage("listsDelete") || "Delete";
+}
+
+function hideNameRow() {
+  listNameRow.hidden = true;
+}
+
+listSelect.addEventListener("change", () => loadList(listSelect.value));
+
+listSaveBtn.addEventListener("click", () => {
+  if (currentListTerms().length === 0) return;
+  listNameInput.value = lists.find((l) => l.id === activeListId)?.name || "";
+  listNameRow.hidden = false;
+  listNameInput.placeholder = chrome.i18n.getMessage("listsNamePlaceholder");
+  listNameInput.focus();
+  listNameInput.select();
+});
+
+function commitListName() {
+  if (saveCurrentAsList(listNameInput.value)) return hideNameRow();
+  // Cap reached: keep the row open so the user can type an existing name instead.
+  listNameInput.value = "";
+  listNameInput.placeholder = chrome.i18n.getMessage("listsLimit");
+  listNameInput.focus();
+}
+listNameOk.addEventListener("click", commitListName);
+listNameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    commitListName();
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    hideNameRow();
+  }
+});
+
+// Deleting only removes the saved copy - the terms on screen stay as they are.
+listDeleteBtn.addEventListener("click", () => {
+  if (!activeListId) return;
+  if (!listDeleteBtn.classList.contains("confirming")) {
+    listDeleteBtn.classList.add("confirming");
+    listDeleteBtn.textContent = chrome.i18n.getMessage("listsDeleteConfirm") || "Sure?";
+    deleteConfirmHandle = setTimeout(resetDeleteConfirm, 3000);
+    return;
+  }
+  lists = lists.filter((l) => l.id !== activeListId);
+  activeListId = null;
+  persistLists();
+  renderLists();
+});
 
 function saveTermsDebounced() {
   clearTimeout(saveHandle);
@@ -142,7 +270,7 @@ async function injectContentScript(tabId) {
   try {
     await chrome.scripting.executeScript({
       target: { tabId, frameIds: [0] }, // only the top-level frame - see trySendMessage
-      files: ["src/highlighter.js", "src/content.js"],
+      files: ["src/highlighter.js", "src/exporter.js", "src/content.js"],
     });
     return true;
   } catch {
@@ -419,6 +547,7 @@ function render() {
   wholeWordToggle.checked = options.wholeWord;
   colorblindToggle.checked = options.colorblind;
   markDuplicates();
+  renderLists();
 }
 
 // Two terms that differ only by case highlight the exact same page text, so
@@ -465,49 +594,153 @@ colorblindToggle.addEventListener("change", () => {
 
 clearAllBtn.addEventListener("click", clearAll);
 
+// Copies every current match, with surrounding text, as Markdown. The page's
+// content script collects the rows (PDFs are stepped through page by page, so
+// this can take a few seconds); the text is built here from the shared
+// exporter.js and written with the popup's click activation.
+//
+// Collecting runs in the page and is reported through the background, so it
+// carries on if the popup closes. The result waits in the background (toolbar
+// badge: … while running, a check mark when ready); reopening the popup turns
+// the button into "Copy" because the clipboard write needs a fresh click.
+const exportBtn = document.getElementById("exportBtn");
+const exportHint = document.getElementById("exportHint");
+const msg = (key) => chrome.i18n.getMessage(key) || "";
+const EXPORT_KEY = "huemark_export";
+const exportStore = chrome.storage.session || chrome.storage.local;
+const exportIdleText = exportBtn.textContent;
+let exportReady = null; // stored { data, names } when a finished export is waiting
+
+// Sentence/paragraph mode and clubbing are applied when copying, not when
+// collecting, so they can be changed after the page has been read.
+const exportMode = document.getElementById("exportMode");
+const exportClub = document.getElementById("exportClub");
+const exportClubRow = document.getElementById("exportClubRow");
+const exportClubInfo = document.getElementById("exportClubInfo");
+const exportClubInfoBtn = document.getElementById("exportClubInfoBtn");
+const EXPORT_PREFS_KEY = "huemark_export_prefs";
+
+const exportPreset = document.getElementById("exportPreset");
+const exportStyle = document.getElementById("exportStyle");
+const exportStyleRow = document.getElementById("exportStyleRow");
+
+function syncExportPrefsUi() {
+  const citation = exportPreset.value === "citation";
+  exportStyleRow.hidden = !citation;
+  // Every preset but Matches lists each passage once, so clubbing by term does not apply.
+  exportClubRow.hidden = exportPreset.value !== "matches" || exportMode.value === "snippet";
+  if (exportClubRow.hidden) {
+    exportClubInfo.hidden = true;
+    exportClubInfoBtn.setAttribute("aria-expanded", "false");
+  }
+}
+function saveExportPrefs() {
+  chrome.storage.local.set({
+    [EXPORT_PREFS_KEY]: { mode: exportMode.value, club: exportClub.checked, preset: exportPreset.value, style: exportStyle.value },
+  });
+}
+chrome.storage.local.get(EXPORT_PREFS_KEY).then((r) => {
+  const prefs = r[EXPORT_PREFS_KEY] || {};
+  if (["snippet", "sentence", "paragraph"].includes(prefs.mode)) exportMode.value = prefs.mode;
+  if (typeof prefs.club === "boolean") exportClub.checked = prefs.club;
+  if (["matches", "citation", "research", "resume"].includes(prefs.preset)) exportPreset.value = prefs.preset;
+  if ([...exportStyle.options].some((o) => o.value === prefs.style)) exportStyle.value = prefs.style;
+  syncExportPrefsUi();
+});
+exportPreset.addEventListener("change", () => { syncExportPrefsUi(); saveExportPrefs(); });
+exportStyle.addEventListener("change", saveExportPrefs);
+exportMode.addEventListener("change", () => { syncExportPrefsUi(); saveExportPrefs(); });
+exportClub.addEventListener("change", saveExportPrefs);
+exportClubInfoBtn.addEventListener("click", () => {
+  exportClubInfo.hidden = !exportClubInfo.hidden;
+  exportClubInfoBtn.setAttribute("aria-expanded", String(!exportClubInfo.hidden));
+});
+
+function exportLabels() {
+  return {
+    title: msg("exportMdTitle"), source: msg("exportMdSource"), exported: msg("exportMdExported"),
+    terms: msg("exportMdTerms"), matches: msg("exportMdMatches"), page: msg("exportMdPage"),
+    line: msg("exportMdLine"), scanned: msg("exportMdScanned"), unreadable: msg("exportMdUnreadable"),
+    none: msg("exportMdNoMatches"), more: msg("exportMdMore"), passages: msg("exportMdPassages"),
+    citeTitle: msg("exportCiteTitle"), citeQuotes: msg("exportCiteQuotes"), citeReference: msg("exportCiteReference"),
+    researchTitle: msg("exportResearchTitle"), researchAuthor: msg("exportResearchAuthor"), researchDate: msg("exportResearchDate"),
+    resumeTitle: msg("exportResumeTitle"), resumeCoverage: msg("exportResumeCoverage"), resumeOther: msg("exportResumeOther"),
+  };
+}
+function showExportState(stored) {
+  exportReady = null;
+  const state = stored?.state;
+  exportHint.hidden = state !== "running";
+  exportBtn.disabled = state === "running";
+  if (state === "running") exportBtn.textContent = msg("exportWorking");
+  else if (state === "ready") { exportReady = stored; exportBtn.textContent = msg("exportReadyBtn"); }
+  else if (state === "none" || state === "failed") {
+    exportBtn.textContent = msg(state === "none" ? "exportNone" : "exportFailed");
+    chrome.runtime.sendMessage({ type: "huemark:exportClear" });
+    setTimeout(() => { if (!exportReady) exportBtn.textContent = exportIdleText; }, 2000);
+  } else exportBtn.textContent = exportIdleText;
+}
+
+async function copyMatches() {
+  if (exportReady) {
+    const { data, names } = exportReady;
+    const labels = exportLabels();
+    let text;
+    try {
+      const opts = { mode: exportMode.value, club: exportClub.checked, preset: exportPreset.value, style: exportStyle.value };
+      // Rich text (bold hits, headings, bullets) plus clean plain text for Notepad / .txt.
+      const plain = window.__huemarkExport.toPlain(data, names, labels, opts);
+      if (typeof ClipboardItem === "function" && navigator.clipboard.write) {
+        const html = window.__huemarkExport.toHtml(data, names, labels, opts);
+        await navigator.clipboard.write([new ClipboardItem({
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([plain], { type: "text/plain" }),
+        })]);
+      } else {
+        await navigator.clipboard.writeText(plain);
+      }
+      text = msg("exportCopied");
+      chrome.runtime.sendMessage({ type: "huemark:exportClear" });
+      exportReady = null;
+    } catch (err) {
+      console.warn("HueMark: export failed", err);
+      text = msg("exportFailed");
+    }
+    const keep = exportReady;
+    exportBtn.textContent = text;
+    setTimeout(() => showExportState(keep), 2000);
+    return;
+  }
+  exportBtn.disabled = true;
+  exportBtn.textContent = msg("exportWorking");
+  exportHint.hidden = false;
+  const names = [...new Set(terms.map((t) => t.term.trim()).filter(Boolean))];
+  const ack = await sendToActiveTab({ type: "huemark:export", names });
+  if (!ack?.started) {
+    exportHint.hidden = true;
+    exportBtn.disabled = false;
+    exportBtn.textContent = msg("exportFailed");
+    setTimeout(() => { exportBtn.textContent = exportIdleText; }, 2000);
+  }
+}
+exportBtn.addEventListener("click", copyMatches);
+
+exportStore.get(EXPORT_KEY).then((r) => showExportState(r[EXPORT_KEY]));
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (EXPORT_KEY in changes && (area === "session" || exportStore === chrome.storage.local)) {
+    showExportState(changes[EXPORT_KEY].newValue);
+  }
+});
+
 // Opens HueMark's PDF.js viewer with no file loaded, so the user can pick a
 // local PDF via PDF.js's own built-in "Open File" toolbar option. That path
 // reads the file as a File object directly (no fetch, no file:// origin
 // involved), so it works even on Firefox, which blocks extension pages from
 // fetching file:// URLs outright (unlike Chrome/Edge, where the automatic
 // file:// redirect in background.js already handles this).
-// Browsing must happen in the popup's own document - only a real click here
-// carries the "user activation" browsers require to show a file picker, so
-// this can't be done from the freshly-opened viewer tab without a second
-// manual click there. The picked file's bytes are handed to background.js,
-// which stashes them briefly so the new viewer tab can pull them back out
-// (a blob: URL created here would be revoked the instant this popup closes,
-// which happens as soon as focus moves to the new tab).
-const localPdfInput = document.getElementById("localPdfInput");
-// Firefox tears down the browserAction popup document the instant a native
-// <input type=file> dialog steals focus, killing this script before the user
-// can pick anything (no console error - the page is just gone). So on
-// Firefox, skip our own picker and open the bare viewer tab instead, where
-// the user can use PDF.js's own built-in Open File option (see comment above).
-const isFirefox = /firefox/i.test(navigator.userAgent);
-document.getElementById("openLocalPdfBtn").addEventListener("click", () => {
-  if (isFirefox) {
-    chrome.tabs.create({ url: chrome.runtime.getURL("vendor/pdfjs/web/viewer.html") });
-    return;
-  }
-  localPdfInput.click();
-});
-localPdfInput.addEventListener("change", async () => {
-  const file = localPdfInput.files[0];
-  localPdfInput.value = "";
-  if (!file) return;
-  // chrome.runtime.sendMessage JSON-serializes its payload, and
-  // JSON.stringify(arrayBuffer) yields "{}" (ArrayBuffers have no enumerable
-  // properties) - silently dropping the bytes. Base64 survives JSON fine.
-  const base64 = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(",", 2)[1]);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-  const { id } = await chrome.runtime.sendMessage({ type: "huemark:stashLocalPdf", base64, name: file.name });
-  const viewerUrl = chrome.runtime.getURL("vendor/pdfjs/web/viewer.html");
-  chrome.tabs.create({ url: `${viewerUrl}?pick=${id}` });
+// Opens the bundled PDF viewer tab; the file / link bar lives inside the viewer (src/pdf-picker.js).
+document.getElementById("openLocalPdfBtn")?.addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("vendor/pdfjs/web/viewer.html") });
 });
 
 // Tells content.js's floating bar to hide while this popup is open. The

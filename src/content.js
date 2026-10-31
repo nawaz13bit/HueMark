@@ -2,7 +2,12 @@
   if (window.__huemarkContentLoaded) return; // avoid double listeners if injected twice
   window.__huemarkContentLoaded = true;
 
-  const { highlight, highlightNodes, clearHighlights, HUEMARK_CLASS } = window.__huemark;
+  const { highlight, highlightNodes, clearHighlights, queryMarks, onShadowRoot } = window.__huemark;
+
+  // The top frame owns the bar, the popup/shortcut conversation and the
+  // cross-frame totals. Iframes (manifest has all_frames) only highlight their
+  // own document and answer the top frame through the background script.
+  const isTop = window === window.top;
 
   let currentTerms = [];
   let currentOptions = { enabled: true, wholeWord: false };
@@ -19,8 +24,25 @@
     highlight(document.body, currentTerms, currentOptions);
   }
 
+  // Iframe side: tell the top frame (via the background) when this frame's
+  // number of matches changed, so its totals can be refreshed.
+  let lastReportedTotal = 0;
+  let reportHandle = null;
+
+  function reportMatchTotal(total) {
+    if (isTop || total === lastReportedTotal) return;
+    lastReportedTotal = total;
+    clearTimeout(reportHandle);
+    reportHandle = setTimeout(() => {
+      try {
+        chrome.runtime.sendMessage({ type: "huemark:subChanged" }, () => void chrome.runtime.lastError);
+      } catch { /* extension reloaded under us - nothing to tell */ }
+    }, 300);
+  }
+
   function rebuildMatchGroups() {
-    const marks = document.querySelectorAll(`.${HUEMARK_CLASS}`);
+    const marks = queryMarks();
+    reportMatchTotal(marks.length);
     const groups = new Map();
     marks.forEach((mark) => {
       const key = mark.getAttribute("data-huemark-term");
@@ -49,6 +71,8 @@
     if (currentOptions.enabled) runFullHighlight();
     rebuildMatchGroups();
     syncBarWords();
+    scheduleMarkers();
+    scheduleSubRefresh();
     lastAppliedTermsJSON = JSON.stringify(currentTerms);
     lastAppliedOptionsJSON = JSON.stringify(currentOptions);
   }
@@ -57,15 +81,61 @@
   // the rest of the term's matches until the next jump (or a rehighlight).
   let currentMarkEl = null;
 
+  // Range matches (CSS Highlight engine) can't take an outline; they paint a
+  // thick underline through setCurrent() instead.
   function markCurrent(el) {
-    if (currentMarkEl && currentMarkEl !== el && currentMarkEl.isConnected) {
-      currentMarkEl.style.outline = "";
-      currentMarkEl.style.outlineOffset = "";
+    if (currentMarkEl && currentMarkEl !== el) {
+      if (currentMarkEl.setCurrent) currentMarkEl.setCurrent(false);
+      else if (currentMarkEl.isConnected) {
+        currentMarkEl.style.outline = "";
+        currentMarkEl.style.outlineOffset = "";
+      }
     }
     currentMarkEl = el;
     if (!el) return;
+    if (el.setCurrent) { el.setCurrent(true); return; }
     el.style.outline = "2px solid #1a73e8";
     el.style.outlineOffset = "1px";
+  }
+
+  // ---- engine selection: <mark> by default, CSS Custom Highlight fallback ----
+  // Some frameworks re-render over our <mark>s and remove them. When the page
+  // removes marks repeatedly, Ranges (which add no DOM nodes) survive.
+  const REMOVAL_LIMIT = 5;
+  const REMOVAL_WINDOW_MS = 10000;
+  let pageRemovals = [];
+
+  function switchEngine(name) {
+    if (window.__huemark.getEngine() === name) return;
+    if (!window.__huemark.setEngine(name)) return;
+    currentMarkEl = null;
+    applyState();
+  }
+
+  function noteForeignRemovals(mutations) {
+    if (window.__huemark.getEngine() !== "mark" || !window.__huemark.cssSupported) return;
+    const now = Date.now();
+    for (const m of mutations) {
+      if (m.type !== "childList") continue;
+      for (const n of m.removedNodes) {
+        if (n.nodeType !== Node.ELEMENT_NODE || window.__huemark.wasRemovedByUs(n)) continue;
+        const hadMark = n.classList.contains(window.__huemark.HUEMARK_CLASS) ||
+          n.getElementsByClassName(window.__huemark.HUEMARK_CLASS).length > 0;
+        if (hadMark) pageRemovals.push(now);
+      }
+    }
+    pageRemovals = pageRemovals.filter((t) => now - t <= REMOVAL_WINDOW_MS);
+    // Framework-managed pages get a lower bar before we give up on <mark>s.
+    if (pageRemovals.length >= (pageLooksFrameworkManaged() ? 2 : REMOVAL_LIMIT)) {
+      pageRemovals = [];
+      setTimeout(() => switchEngine("css"), 0);
+    }
+  }
+
+  // Attribute hints of client-rendered frameworks that tend to wipe foreign DOM.
+  const FRAMEWORK_HINTS = "#__next, #__nuxt, [data-reactroot], [data-v-app], [ng-version], [data-server-rendered]";
+  function pageLooksFrameworkManaged() {
+    try { return !!document.querySelector(FRAMEWORK_HINTS); } catch { return false; }
   }
 
   // While a jump()'s smooth-scroll animation is still in flight, the match it
@@ -76,6 +146,22 @@
   // Suppress the observer's index sync for the animation's duration.
   let suppressScrollSyncHandle = null;
 
+  function suppressScrollSync() {
+    clearTimeout(suppressScrollSyncHandle);
+    suppressScrollSyncHandle = setTimeout(() => { suppressScrollSyncHandle = null; }, 700);
+  }
+
+  // Scrolls to and outlines this frame's idx-th match of a term.
+  function focusLocal(termLower, idx) {
+    const el = (matchGroups.get(termLower) || [])[idx];
+    if (!el) return;
+    subCursor.delete(termLower);
+    currentIndex.set(termLower, idx);
+    suppressScrollSync();
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    markCurrent(el);
+  }
+
   function jump(termLower, direction) {
     // Always rebuild from the live DOM first - matchGroups/currentIndex are
     // only otherwise refreshed by getCounts, so a jump right after a DOM
@@ -84,15 +170,137 @@
     const arr = matchGroups.get(termLower) || [];
     if (arr.length === 0) return { count: 0, current: 0 };
     let idx = currentIndex.has(termLower) ? currentIndex.get(termLower) : -1;
-    idx = direction === "next" ? (idx + 1) % arr.length : (idx - 1 + arr.length) % arr.length;
-    currentIndex.set(termLower, idx);
-    const el = arr[idx];
-    clearTimeout(suppressScrollSyncHandle);
-    suppressScrollSyncHandle = setTimeout(() => { suppressScrollSyncHandle = null; }, 700);
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    markCurrent(el);
+    idx = direction === "next" ? (idx + 1) % arr.length : (idx <= 0 ? arr.length - 1 : idx - 1);
+    focusLocal(termLower, idx);
     return { count: arr.length, current: idx + 1 };
   }
+
+  // ---------------------------------------------------------------------
+  // Iframes. The top frame adds its iframes' matches to its own: counts and
+  // next/prev run through the whole page, this frame's matches first, then
+  // each iframe's (in frame order). The iframes are reached through the
+  // background script (scripting.executeScript into every frame), because
+  // frames can't message each other directly.
+  // ---------------------------------------------------------------------
+
+  // term key -> [{ frameId, n }] for iframes that have matches, by frameId
+  let subCounts = new Map();
+  // term key -> { frameId, idx }: the current match is in an iframe
+  const subCursor = new Map();
+  let subRefreshHandle = null;
+
+  const hasChildFrames = () => isTop && window.length > 0;
+
+  function relay(message) {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage(message, (response) => {
+          void chrome.runtime.lastError;
+          resolve(response ?? null);
+        });
+      } catch {
+        resolve(null);
+      }
+    });
+  }
+
+  function termKeys() {
+    return [...new Set(currentTerms.map((t) => (t.term || "").trim().toLowerCase()).filter(Boolean))];
+  }
+
+  async function refreshSubCounts() {
+    if (!isTop) return;
+    const keys = termKeys();
+    const next = new Map();
+    if (hasChildFrames() && keys.length > 0 && currentOptions.enabled) {
+      for (const { frameId, result } of (await relay({ type: "huemark:frameCounts", keys })) || []) {
+        for (const [key, n] of Object.entries(result)) {
+          if (n > 0) next.set(key, [...(next.get(key) || []), { frameId, n }]);
+        }
+      }
+      for (const list of next.values()) list.sort((a, b) => a.frameId - b.frameId);
+    }
+    subCounts = next;
+    for (const [key, cur] of subCursor) {
+      const f = next.get(key)?.find((x) => x.frameId === cur.frameId);
+      if (!f || cur.idx >= f.n) subCursor.delete(key);
+    }
+    if (barCountEl) updateNavDisplay();
+  }
+
+  function scheduleSubRefresh() {
+    if (!hasChildFrames() && subCounts.size === 0) return;
+    clearTimeout(subRefreshHandle);
+    subRefreshHandle = setTimeout(refreshSubCounts, 300);
+  }
+
+  // { count, current } for a term across this frame and its iframes.
+  function countsFor(key) {
+    const local = (matchGroups.get(key) || []).length;
+    const subs = subCounts.get(key) || [];
+    const count = subs.reduce((sum, f) => sum + f.n, local);
+    let current = 0;
+    const cur = subCursor.get(key);
+    if (cur) {
+      let before = local;
+      for (const f of subs) {
+        if (f.frameId === cur.frameId) { current = before + cur.idx + 1; break; }
+        before += f.n;
+      }
+    } else {
+      const idx = currentIndex.get(key);
+      current = idx !== undefined && idx >= 0 ? idx + 1 : 0;
+    }
+    return { count, current };
+  }
+
+  async function jumpAcross(key, direction) {
+    if (!hasChildFrames()) return jump(key, direction);
+    await refreshSubCounts();
+    const subs = subCounts.get(key) || [];
+    if (subs.length === 0) return jump(key, direction);
+
+    rebuildMatchGroups();
+    const frames = [{ frameId: 0, n: (matchGroups.get(key) || []).length }, ...subs].filter((f) => f.n > 0);
+    const total = frames.reduce((sum, f) => sum + f.n, 0);
+    let pos = countsFor(key).current - 1; // -1: nothing visited yet
+    pos = direction === "next" ? (pos + 1) % total : (pos <= 0 ? total - 1 : pos - 1);
+
+    for (const f of frames) {
+      if (pos >= f.n) { pos -= f.n; continue; }
+      if (f.frameId === 0) {
+        focusLocal(key, pos);
+        relay({ type: "huemark:frameClear" });
+      } else {
+        markCurrent(null);
+        subCursor.set(key, { frameId: f.frameId, idx: pos });
+        suppressScrollSync();
+        await relay({ type: "huemark:frameFocus", key, idx: pos, frameId: f.frameId });
+      }
+      break;
+    }
+    return countsFor(key);
+  }
+
+  // What the background script runs inside each iframe (see background.js).
+  window.__huemarkApi = {
+    counts(keys) {
+      rebuildMatchGroups();
+      return Object.fromEntries(keys.map((k) => [k, (matchGroups.get(k) || []).length]));
+    },
+    focus(key, idx) {
+      rebuildMatchGroups();
+      focusLocal(key, idx);
+      return true;
+    },
+    clearCurrent() {
+      markCurrent(null);
+      return true;
+    },
+    export() {
+      return window.__huemarkExport ? window.__huemarkExport.collectFrame() : null;
+    }
+  };
 
   // Mutation batches accumulate here across possibly-several MutationObserver
   // callback firings before the debounce timer flushes them, so nothing
@@ -167,24 +375,138 @@
     if (newMarks > 0 || removalHappened) {
       rebuildMatchGroups();
       syncBarWords();
+      scheduleMarkers();
+      scheduleSubRefresh();
     }
   }
+
+  // ---------------------------------------------------------------------
+  // Scrollbar markers: a thin strip along the right edge with one tick per
+  // match, colored per term, positioned as the match's fraction of the whole
+  // scrollable height. Click a tick to jump to that match. Lives in its own
+  // shadow root on <html> (outside <body>, so the MutationObserver above
+  // never sees it). In PDF.js the scroller is #viewerContainer, and pages
+  // render lazily, so only already-rendered pages get ticks.
+  // ---------------------------------------------------------------------
+
+  const MAX_TICKS = 2000;
+  let markerHost = null;
+  let markerLayer = null;
+  let markerHandle = null;
+
+  function ensureMarkers() {
+    if (markerHost) return;
+    markerHost = document.createElement("div");
+    markerHost.id = "huemark-markers-host";
+    markerHost.style.cssText = "all:initial; position:fixed; top:0; right:0; bottom:0; width:10px; z-index:2147483646; pointer-events:none;";
+    const shadow = markerHost.attachShadow({ mode: "open" });
+    const style = document.createElement("style");
+    style.textContent = `
+      .tick {
+        position: absolute;
+        right: 0;
+        width: 10px;
+        height: 4px;
+        box-sizing: border-box;
+        border: 1px solid rgba(0,0,0,0.45);
+        cursor: pointer;
+        pointer-events: auto;
+      }
+      .tick:hover { width: 14px; }
+    `;
+    markerLayer = document.createElement("div");
+    shadow.append(style, markerLayer);
+    document.documentElement.appendChild(markerHost);
+  }
+
+  function scheduleMarkers() {
+    if (!isTop) return; // iframes get no tick strip
+    clearTimeout(markerHandle);
+    markerHandle = setTimeout(renderMarkers, 200);
+  }
+
+  function renderMarkers() {
+    markerHandle = null;
+    const marks = (currentOptions.enabled && currentTerms.length > 0)
+      ? queryMarks()
+      : [];
+    if (marks.length === 0) {
+      if (markerHost) markerHost.style.display = "none";
+      return;
+    }
+    ensureMarkers();
+    markerHost.style.display = "block";
+
+    const container = document.getElementById("viewerContainer");
+    const scroller = container || document.scrollingElement || document.documentElement;
+    const scrollTop = scroller.scrollTop;
+    const scrollHeight = scroller.scrollHeight;
+    const viewHeight = container ? container.clientHeight : window.innerHeight;
+    const viewTop = container ? container.getBoundingClientRect().top : 0;
+    if (scrollHeight <= 0 || viewHeight <= 0) return;
+
+    const frag = document.createDocumentFragment();
+    const seen = new Set();
+    for (const mark of marks) {
+      const rect = mark.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) continue;
+      // Position within the scroller's full content height; marks inside an
+      // inner scroll container fall outside 0..1 and are skipped.
+      const docY = rect.top - viewTop + scrollTop;
+      const frac = docY / scrollHeight;
+      if (frac < 0 || frac > 1) continue;
+      const y = Math.round(viewTop + frac * viewHeight);
+      const color = mark.style.backgroundColor;
+      const dedupe = `${y}|${color}`;
+      if (seen.has(dedupe)) continue;
+      seen.add(dedupe);
+      const tick = document.createElement("div");
+      tick.className = "tick";
+      tick.style.top = `${y}px`;
+      tick.style.background = color;
+      tick.addEventListener("click", () => {
+        if (!mark.isConnected) return;
+        const key = mark.getAttribute("data-huemark-term");
+        rebuildMatchGroups();
+        const idx = (matchGroups.get(key) || []).indexOf(mark);
+        if (idx !== -1) currentIndex.set(key, idx);
+        subCursor.delete(key);
+        mark.scrollIntoView({ behavior: "smooth", block: "center" });
+        markCurrent(mark);
+        updateNavDisplay();
+      });
+      frag.appendChild(tick);
+      if (seen.size >= MAX_TICKS) break;
+    }
+    markerLayer.replaceChildren(frag);
+  }
+
+  window.addEventListener("resize", scheduleMarkers);
+  // Page height changes (images loading, content expanding) shift every
+  // match's fraction without any mutation we'd otherwise react to.
+  new ResizeObserver(scheduleMarkers).observe(document.documentElement);
+
+  const OBS_OPTS = {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ["style", "class", "hidden", "aria-hidden", "open"]
+  };
 
   function startObserving() {
     if (observer) observer.disconnect();
     observer = new MutationObserver((mutations) => {
       if (!currentOptions.enabled || currentTerms.length === 0) return;
+      noteForeignRemovals(mutations);
       queueMutations(mutations);
       clearTimeout(debounceHandle);
       debounceHandle = setTimeout(runIncrementalHighlight, 150);
     });
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ["style", "class", "hidden", "aria-hidden", "open"]
-    });
+    observer.observe(document.body, OBS_OPTS);
+    // Shadow trees aren't covered by a subtree observation of the body, so
+    // each one (existing now, or attached later) gets its own observe().
+    onShadowRoot((sr) => { if (observer) observer.observe(sr, OBS_OPTS); });
   }
 
   // ---------------------------------------------------------------------
@@ -447,23 +769,37 @@
       closeDropdown();
     });
 
-    nav.append(barUpBtn, barDownBtn, barCountEl, moveBtn, closeBtn);
+    // Power: turns HueMark off globally (same setting as the popup switch).
+    const powerBtn = document.createElement("button");
+    powerBtn.type = "button";
+    powerBtn.textContent = "⏻";
+    powerBtn.title = chrome.i18n.getMessage("barDisable");
+    powerBtn.addEventListener("click", async () => {
+      barClosed = true;
+      barHost.style.display = "none";
+      closeDropdown();
+      const { huemark_options } = await chrome.storage.local.get("huemark_options");
+      await chrome.storage.local.set({ huemark_options: { ...(huemark_options || {}), enabled: false } });
+    });
+
+    nav.append(barUpBtn, barDownBtn, barCountEl, moveBtn, powerBtn, closeBtn);
     bar.append(combo, nav);
     barShadow.append(style, bar);
     document.documentElement.appendChild(barHost);
     applyBarPosition();
   }
 
-  function doJump(direction) {
+  async function doJump(direction) {
     const entry = activeEntry();
     const term = entry?.term.trim();
     if (!term) return;
-    const res = jump(term.toLowerCase(), direction);
+    const res = await jumpAcross(term.toLowerCase(), direction);
     updateNavDisplay(res);
     setupScrollObserver();
   }
 
   function updateNavDisplay(res) {
+    if (!barCountEl) return;
     const entry = activeEntry();
     let count = 0;
     let current = 0;
@@ -471,11 +807,7 @@
       if (res) {
         ({ count, current } = res);
       } else {
-        const key = entry.term.trim().toLowerCase();
-        const arr = matchGroups.get(key) || [];
-        const idx = currentIndex.get(key);
-        count = arr.length;
-        current = idx !== undefined && idx >= 0 ? idx + 1 : 0;
+        ({ count, current } = countsFor(entry.term.trim().toLowerCase()));
       }
     }
     barCountEl.textContent = `${current}/${count}`;
@@ -543,6 +875,7 @@
   }
 
   function syncBarWords() {
+    if (!isTop) return; // the bar lives in the top frame only
     if (!barHost) ensureBar();
 
     if (currentTerms.length === 0 || popupOpen || barClosed) {
@@ -580,6 +913,7 @@
   // identical, so this compares element-by-element rather than by reference.
   let observedTerm = null;
   let observedEls = [];
+  let rangeScrollHandler = null;
 
   function sameEls(a, b) {
     if (a.length !== b.length) return false;
@@ -597,9 +931,38 @@
     if (term === observedTerm && sameEls(arr, observedEls)) return; // nothing to redo
 
     if (scrollObserver) scrollObserver.disconnect();
+    if (rangeScrollHandler) {
+      window.removeEventListener("scroll", rangeScrollHandler, true);
+      rangeScrollHandler = null;
+    }
     observedTerm = term || null;
     observedEls = arr;
     if (!term || arr.length === 0) return;
+
+    // IntersectionObserver can't watch Ranges: poll positions on scroll instead.
+    if (arr[0].setCurrent) {
+      let frame = 0;
+      rangeScrollHandler = () => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          if (suppressScrollSyncHandle) return;
+          const lo = window.innerHeight * 0.45;
+          const hi = window.innerHeight * 0.55;
+          const idx = arr.findIndex((m) => {
+            if (!m.isConnected) return false;
+            const r = m.getBoundingClientRect();
+            return r.bottom >= lo && r.top <= hi;
+          });
+          if (idx === -1) return;
+          currentIndex.set(term, idx);
+          subCursor.delete(term);
+          updateNavDisplay();
+        });
+      };
+      window.addEventListener("scroll", rangeScrollHandler, { capture: true, passive: true });
+      return;
+    }
 
     scrollObserver = new IntersectionObserver(
       (entries) => {
@@ -609,6 +972,7 @@
         const idx = arr.indexOf(hit.target);
         if (idx === -1) return;
         currentIndex.set(term, idx);
+        subCursor.delete(term);
         updateNavDisplay();
       },
       { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
@@ -665,18 +1029,42 @@
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === "huemark:getCounts") {
       rebuildMatchGroups();
-      const result = {};
-      for (const term of msg.terms || []) {
-        const key = term.toLowerCase();
-        const arr = matchGroups.get(key) || [];
-        const idx = currentIndex.get(key);
-        result[term] = { count: arr.length, current: idx !== undefined && idx >= 0 ? idx + 1 : 0 };
-      }
-      sendResponse(result);
+      const answer = () => {
+        const result = {};
+        for (const term of msg.terms || []) result[term] = countsFor(term.toLowerCase());
+        sendResponse(result);
+      };
+      if (hasChildFrames()) refreshSubCounts().then(answer);
+      else answer();
+      return true;
+    }
+    if (msg?.type === "huemark:export") {
+      if (!window.__huemarkExport) { sendResponse(null); return; }
+      // Acknowledge at once and report through the background instead of the
+      // response: the popup that asked may be closed long before a big PDF
+      // finishes, and the background keeps the result until the popup returns.
+      sendResponse({ started: true });
+      const names = msg.names || [];
+      const finish = (data) => {
+        try { chrome.runtime.sendMessage({ type: "huemark:exportDone", data, names }, () => void chrome.runtime.lastError); } catch (_) {}
+      };
+      try { chrome.runtime.sendMessage({ type: "huemark:exportBegin" }, () => void chrome.runtime.lastError); } catch (_) {}
+      (async () => {
+        const data = await window.__huemarkExport.collect();
+        data.frames = hasChildFrames()
+          ? ((await relay({ type: "huemark:frameExport" })) || []).map((f) => f.result).filter((r) => r && r.rows.length)
+          : [];
+        return data;
+      })().then(finish, () => finish(null));
       return;
     }
     if (msg?.type === "huemark:jump") {
-      sendResponse(jump(msg.term.toLowerCase(), msg.direction));
+      jumpAcross(msg.term.toLowerCase(), msg.direction).then(sendResponse);
+      return true;
+    }
+    if (msg?.type === "huemark:subChanged") {
+      scheduleSubRefresh();
+      return;
     }
     if (msg?.type === "huemark:cycleWord") {
       if (currentTerms.length === 0) return;

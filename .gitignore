@@ -1,3 +1,6 @@
 src/donate.js
 dist/
 marketing-strategy.md
+competitor-analysis.md
+node_modules/
+tests/live/shots/

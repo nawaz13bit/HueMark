@@ -1,7 +1,7 @@
-// HueMark: when the viewer is opened right after the popup's "Open local
-// PDF..." picker (?pick=<id> in the URL), fetch the stashed file bytes from
-// background.js and load them straight into PDF.js - the user already
-// browsed and picked the file in the popup, so no second file dialog here.
+// HueMark PDF viewer helper (loaded by vendor/pdfjs/web/viewer.html).
+//
+// Legacy ?pick=<id> flow: fetch bytes stashed by background.js and load
+// them straight into PDF.js. The viewer's own toolbar is left untouched.
 (function () {
   const id = new URLSearchParams(location.search).get("pick");
   if (!id) return;
@@ -13,9 +13,7 @@
       window.PDFViewerApplication.open({ data: bytes, filename: entry.name });
     };
     // window.PDFViewerApplication.initializedPromise isn't set until
-    // PDFViewerApplication.run() actually starts (a beat after this script
-    // runs and after "webviewerloaded" fires), so poll for it rather than
-    // assuming either event has already happened.
+    // PDFViewerApplication.run() actually starts, so poll for it.
     const waitForApp = setInterval(() => {
       const promise = window.PDFViewerApplication?.initializedPromise;
       if (!promise) return;

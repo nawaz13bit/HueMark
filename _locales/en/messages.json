@@ -23,6 +23,10 @@
     "message": "Jump to the next match",
     "description": "Keyboard shortcut description."
   },
+  "contextMenuAdd": {
+    "message": "Add selection to HueMark",
+    "description": "Right-click menu item shown on selected text; adds the selection as a highlighted term."
+  },
   "commandToggleFc": {
     "message": "Toggle bar (Chromium: cycles bar -> popup -> closed)",
     "description": "Keyboard shortcut description."
@@ -39,13 +43,45 @@
     "message": "Colorblind-friendly palette",
     "description": "Label for the colorblind palette checkbox in the popup."
   },
-  "popupOpenLocalPdf": {
-    "message": "Open local PDF...",
-    "description": "Button that opens a local PDF file picker."
+  "popupOpenPdfViewer": {
+    "message": "Open PDF viewer",
+    "description": "Button that opens HueMark's PDF viewer tab, where a PDF file can be opened."
+  },
+  "popupPdfHelpTitleV": {
+    "message": "PDF help",
+    "description": "Summary/title for the collapsible PDF help section."
+  },
+  "popupHintPdfViewer": {
+    "message": "\"Open PDF viewer\" opens a tab where you can open a PDF file from your computer with the viewer's Open File button. PDFs opened from web links load in this viewer automatically; for PDFs already on your computer, enable \"Allow access to file URLs\" for HueMark in the browser's extension settings (Chrome/Edge).",
+    "description": "Help text for opening PDFs."
   },
   "popupClearAll": {
     "message": "Clear all",
     "description": "Button that clears all search terms."
+  },
+  "listsPlaceholder": {
+    "message": "Saved lists…",
+    "description": "First option of the saved term lists dropdown, shown when no list is selected."
+  },
+  "listsSave": {
+    "message": "Save",
+    "description": "Button that saves the current terms as a named list."
+  },
+  "listsDelete": {
+    "message": "Delete",
+    "description": "Button that deletes the selected saved list."
+  },
+  "listsDeleteConfirm": {
+    "message": "Sure?",
+    "description": "Delete button text while waiting for a second click to confirm."
+  },
+  "listsNamePlaceholder": {
+    "message": "List name",
+    "description": "Placeholder of the text box where the saved list name is typed."
+  },
+  "listsLimit": {
+    "message": "10 lists max – reuse a name",
+    "description": "Placeholder shown in the list name box when the saved list limit (10) is reached and the typed name is new. Keep it short."
   },
   "popupHintPersist": {
     "message": "Highlights persist across reloads and update as new content loads on the page.",
@@ -54,10 +90,6 @@
   "popupPdfHelpTitle": {
     "message": "Local PDF help",
     "description": "Summary/title for the collapsible section containing local PDF help text."
-  },
-  "popupHintLocalPdf": {
-    "message": "On Chrome/Edge, local PDFs also open automatically if you enable \"Allow access to file URLs\" for HueMark in your browser's extension settings - Firefox blocks this for extensions, so use \"Open local PDF...\" above instead. On Firefox, that button opens the PDF viewer tab; click its own \"Open File\" button there to pick your PDF.",
-    "description": "Footer hint text in the popup about local PDF file access."
   },
   "popupDonateLink": {
     "message": "☕ Support this extension",
@@ -130,5 +162,64 @@
   "barClose": {
     "message": "Close",
     "description": "Tooltip for the button that closes the floating on-page bar."
-  }
+  },
+  "popupExportBtn": { "message": "Copy matches" },
+  "exportWorking": { "message": "Collecting…" },
+  "exportCopied": { "message": "Copied!" },
+  "exportNone": { "message": "No matches to copy" },
+  "exportFailed": { "message": "Copy failed" },
+  "exportMdTitle": { "message": "HueMark matches" },
+  "exportMdSource": { "message": "Source" },
+  "exportMdExported": { "message": "Exported" },
+  "exportMdTerms": { "message": "Terms" },
+  "exportMdMatches": { "message": "Total matches" },
+  "exportMdPage": { "message": "p." },
+  "exportMdLine": { "message": "line ~" },
+  "exportMdScanned": { "message": "This PDF has no selectable text (it looks scanned), so nothing could be searched." },
+  "exportMdUnreadable": { "message": "{n} match(es) contain unreadable characters from the PDF's font encoding (shown as ?)." },
+  "exportMdNoMatches": { "message": "No matches." },
+  "exportMdMore": { "message": "more not shown" },
+  "exportHint": { "message": "Reading the page… you can close this popup. The toolbar icon shows ✓ when it's ready; keep the tab open." },
+  "exportReadyBtn": { "message": "Export ready: click to copy" },
+  "popupExportMode": { "message": "Extract" },
+  "exportModeSnippet": { "message": "Snippet" },
+  "exportModeSentence": { "message": "Sentence" },
+  "exportModeParagraph": { "message": "Paragraph" },
+  "popupExportClub": { "message": "Club passages with several terms under one header" },
+  "exportClubInfoLabel": { "message": "Why club them?" },
+  "exportClubInfo": { "message": "A paragraph or sentence that contains several of your terms is listed once, under a header such as “cat + dog”, instead of being repeated under each term. Nothing is duplicated, the totals stay honest, and the “cat + dog” section shows where your terms appear together. Untick this to repeat the passage under every term it contains." },
+  "exportMdPassages": { "message": "Passages" },
+  "popupExportHelpTitle": {
+    "message": "Export help",
+    "description": "Summary/title for the collapsible export help section."
+  },
+  "popupHintExportHelp": {
+    "message": "Format: Matches lists every hit. Citation adds a formatted reference (APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA, Bluebook or Plain) and an in-text citation after each quote. Research adds the author, date, source and section for each passage. Resume shows which terms were found, with counts, and where.",
+    "description": "Help text for the export Format presets."
+  },
+  "popupListsHelpTitle": {
+    "message": "Saved lists help",
+    "description": "Summary/title for the collapsible saved-lists help section."
+  },
+  "popupHintListsHelp": {
+    "message": "Save your current terms under a name to reuse them later. You can keep up to 10 lists; click Delete twice to remove one and make room for another.",
+    "description": "Help text for saved term lists and the limit (10)."
+  },
+  "popupExportPreset": { "message": "Format" },
+  "exportPresetMatches": { "message": "Matches" },
+  "exportPresetCitation": { "message": "Citation" },
+  "popupExportStyle": { "message": "Style" },
+  "exportStylePlain": { "message": "Plain" },
+  "exportCiteTitle": { "message": "Citations" },
+  "exportCiteQuotes": { "message": "Quotes" },
+  "exportCiteReference": { "message": "Reference" },
+  "exportPresetResearch": { "message": "Research" },
+  "exportPresetResume": { "message": "Resume" },
+  "exportResearchTitle": { "message": "Research notes" },
+  "exportResearchAuthor": { "message": "Author" },
+  "exportResearchDate": { "message": "Year" },
+  "exportResumeTitle": { "message": "Resume screen" },
+  "exportResumeCoverage": { "message": "Coverage" },
+  "exportResumeOther": { "message": "Other" },
+  "barDisable": { "message": "Turn HueMark off" }
 }
