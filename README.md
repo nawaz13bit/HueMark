@@ -123,6 +123,21 @@ HueMark/
 ## Next implementation steps
 
 - [ ] Per-site enable/disable (currently global on/off only).
+- [x] Per-term match counts (`current/total`) with next/prev navigation.
+- [ ] Overall match total across all terms.
+- [x] Saved term lists: save the current terms under a name and load them back from a dropdown in the popup.
+- [ ] Import/export of term lists (JSON/CSV) and bulk paste of terms.
+- [x] Right-click "add selection to HueMark".
+- [x] Scrollbar match markers, colored per term.
+- [x] Wildcard support (`*`, `?`, `\` escape) and optional regex (`/pattern/`).
+- [ ] Highlight inside input/textarea fields.
+- [x] Accent-insensitive matching, always on (Latin and Greek letters, Arabic/Hebrew points; scripts where marks carry meaning are left alone).
+- [x] Shadow DOM (open and closed roots) and iframe coverage; counts and next/prev run across the page and its iframes.
+- [ ] Performance guardrails for many terms and heavy pages (including a lazy-start option). Deferred: benchmarks show normal pages are fast, and time-slicing makes huge pages slower overall.
+- [x] Persistence checks: highlights survive tab switches, idle, popup close, a stopped service worker, reload and back navigation (verified in real Chromium with the unpacked extension).
+- [x] Dark mode for the popup (follows the system theme).
+- [x] Storage quota check: everything lives in `storage.local` (10 MB), not `storage.sync`; terms are capped at 6 per list, so ~7,500 worst-case saved lists fit. Moving to `storage.sync` would not work as-is (8 KB per item, 100 KB total).
+- [x] Export matches with surrounding context: "Copy matches" in the popup copies rich text (bold hits) plus clean plain text, so it pastes into Word, Outlook, Docs or Notepad. One section per term, each match with its surrounding text, the page title and URL. PDFs add page and approximate line numbers; scanned PDFs (no selectable text) say so instead of exporting nothing; output is capped at 500 matches per term. Nothing is saved or sent anywhere, the text goes to your clipboard.
 - [ ] Safari port.
 - [ ] Consider rewriting the highlight engine on the [CSS Custom Highlight
       API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API)
@@ -132,6 +147,11 @@ HueMark/
       in `<mark>` can conflict with React/Vue's own re-rendering of that
       same DOM (reverted highlights, or errors when the framework tries to
       remove a text node HueMark has replaced).
+
+### Not planned
+
+- AI summaries or accounts (no-account is part of the pitch).
+- Paywalled PDF or OCR (free PDF support is a differentiator).
 
 ## License
 
