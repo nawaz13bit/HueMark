@@ -80,8 +80,21 @@ async function loadState() {
   lists = data.huemark_lists || [];
   activeListId = data.huemark_active_list || null;
   terms = (data.huemark_terms || []).map((t) => ({ ...t }));
-  options = { enabled: true, wholeWord: false, colorblind: false, ...(data.huemark_options || {}) };
+  options = { wholeWord: false, colorblind: false, ...(data.huemark_options || {}), enabled: false };
+  // "enabled" is the per-tab switch: it comes from the background, not from storage.
+  const tab = await getActiveTab();
+  activeTabId = tab?.id ?? null;
+  activeTabIsPdf = !!tab?.url && tab.url.startsWith(chrome.runtime.getURL("vendor/pdfjs/web/viewer.html"));
+  if (activeTabId != null) {
+    try {
+      const r = await chrome.runtime.sendMessage({ type: "huemark:getTabOn", tabId: activeTabId });
+      options.enabled = !!r?.on;
+    } catch (_) {}
+  }
 }
+
+let activeTabId = null;
+let activeTabIsPdf = false;
 
 function ensureTrailingEmptyBox() {
   const last = terms[terms.length - 1];
@@ -235,7 +248,8 @@ function saveTermsDebounced() {
 }
 
 async function saveOptions() {
-  await chrome.storage.local.set({ huemark_options: options });
+  const { enabled, ...persisted } = options; // the per-tab switch is never written to storage
+  await chrome.storage.local.set({ huemark_options: persisted });
   scheduleCountRefresh();
 }
 
@@ -544,6 +558,7 @@ function render() {
   termBoxes.innerHTML = "";
   terms.forEach((entry) => termBoxes.appendChild(makeBox(entry)));
   enabledToggle.checked = options.enabled;
+  renderEnabledLabel();
   wholeWordToggle.checked = options.wholeWord;
   colorblindToggle.checked = options.colorblind;
   markDuplicates();
@@ -574,10 +589,26 @@ function markDuplicates() {
   });
 }
 
-enabledToggle.addEventListener("change", () => {
+enabledToggle.addEventListener("change", async () => {
   options.enabled = enabledToggle.checked;
-  saveOptions();
+  renderEnabledLabel();
+  if (activeTabId == null) return;
+  try {
+    await chrome.runtime.sendMessage({ type: "huemark:setTabOn", tabId: activeTabId, on: options.enabled });
+  } catch (_) {}
+  scheduleCountRefresh();
 });
+
+function renderEnabledLabel() {
+  const label = document.getElementById("enabledLabel");
+  const text = chrome.i18n.getMessage(activeTabIsPdf ? "popupEnabledPdf" : "popupEnabledTab");
+  if (label && text) label.textContent = text;
+  enabledToggle.title = chrome.i18n.getMessage(
+    options.enabled ? (activeTabIsPdf ? "barDisablePdf" : "barDisable") : (activeTabIsPdf ? "barEnablePdf" : "barEnable")
+  );
+  const hint = document.getElementById("offHint");
+  if (hint) hint.hidden = options.enabled;
+}
 
 wholeWordToggle.addEventListener("change", () => {
   options.wholeWord = wholeWordToggle.checked;
@@ -622,11 +653,15 @@ const EXPORT_PREFS_KEY = "huemark_export_prefs";
 
 const exportPreset = document.getElementById("exportPreset");
 const exportStyle = document.getElementById("exportStyle");
+const exportLegalStyle = document.getElementById("exportLegalStyle");
 const exportStyleRow = document.getElementById("exportStyleRow");
+const currentExportStyle = () => (exportPreset.value === "legal" ? exportLegalStyle : exportStyle).value;
 
 function syncExportPrefsUi() {
-  const citation = exportPreset.value === "citation";
-  exportStyleRow.hidden = !citation;
+  const legal = exportPreset.value === "legal";
+  exportStyleRow.hidden = !(legal || exportPreset.value === "citation");
+  exportStyle.hidden = legal;
+  exportLegalStyle.hidden = !legal;
   // Every preset but Matches lists each passage once, so clubbing by term does not apply.
   exportClubRow.hidden = exportPreset.value !== "matches" || exportMode.value === "snippet";
   if (exportClubRow.hidden) {
@@ -636,19 +671,21 @@ function syncExportPrefsUi() {
 }
 function saveExportPrefs() {
   chrome.storage.local.set({
-    [EXPORT_PREFS_KEY]: { mode: exportMode.value, club: exportClub.checked, preset: exportPreset.value, style: exportStyle.value },
+    [EXPORT_PREFS_KEY]: { mode: exportMode.value, club: exportClub.checked, preset: exportPreset.value, style: exportStyle.value, legalStyle: exportLegalStyle.value },
   });
 }
 chrome.storage.local.get(EXPORT_PREFS_KEY).then((r) => {
   const prefs = r[EXPORT_PREFS_KEY] || {};
   if (["snippet", "sentence", "paragraph"].includes(prefs.mode)) exportMode.value = prefs.mode;
   if (typeof prefs.club === "boolean") exportClub.checked = prefs.club;
-  if (["matches", "citation", "research", "resume"].includes(prefs.preset)) exportPreset.value = prefs.preset;
+  if (["matches", "citation", "legal", "research", "resume"].includes(prefs.preset)) exportPreset.value = prefs.preset;
   if ([...exportStyle.options].some((o) => o.value === prefs.style)) exportStyle.value = prefs.style;
+  if ([...exportLegalStyle.options].some((o) => o.value === prefs.legalStyle)) exportLegalStyle.value = prefs.legalStyle;
   syncExportPrefsUi();
 });
 exportPreset.addEventListener("change", () => { syncExportPrefsUi(); saveExportPrefs(); });
 exportStyle.addEventListener("change", saveExportPrefs);
+exportLegalStyle.addEventListener("change", saveExportPrefs);
 exportMode.addEventListener("change", () => { syncExportPrefsUi(); saveExportPrefs(); });
 exportClub.addEventListener("change", saveExportPrefs);
 exportClubInfoBtn.addEventListener("click", () => {
@@ -687,7 +724,7 @@ async function copyMatches() {
     const labels = exportLabels();
     let text;
     try {
-      const opts = { mode: exportMode.value, club: exportClub.checked, preset: exportPreset.value, style: exportStyle.value };
+      const opts = { mode: exportMode.value, club: exportClub.checked, preset: exportPreset.value, style: currentExportStyle() };
       // Rich text (bold hits, headings, bullets) plus clean plain text for Notepad / .txt.
       const plain = window.__huemarkExport.toPlain(data, names, labels, opts);
       if (typeof ClipboardItem === "function" && navigator.clipboard.write) {
@@ -719,7 +756,7 @@ async function copyMatches() {
   if (!ack?.started) {
     exportHint.hidden = true;
     exportBtn.disabled = false;
-    exportBtn.textContent = msg("exportFailed");
+    exportBtn.textContent = ack?.off ? msg("exportOff") : msg("exportFailed");
     setTimeout(() => { exportBtn.textContent = exportIdleText; }, 2000);
   }
 }

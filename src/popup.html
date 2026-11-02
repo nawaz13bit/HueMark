@@ -10,10 +10,11 @@
   <header>
     <h1>HueMark</h1>
     <label class="toggle">
-      <span data-i18n="popupEnabled">Enabled</span>
-      <input type="checkbox" id="enabledToggle" class="switch" role="switch" checked />
+      <span id="enabledLabel" data-i18n="popupEnabledTab">Enabled for this tab</span>
+      <input type="checkbox" id="enabledToggle" class="switch" role="switch" />
     </label>
   </header>
+  <p id="offHint" class="shortcut-banner" data-i18n="popupOffHint">HueMark is off on this tab. Turn it on to highlight.</p>
 
   <div id="shortcutBanner" class="shortcut-banner" hidden>
     <span data-i18n="popupShortcutsMissing">Keyboard shortcuts aren't set up yet.</span>
@@ -51,6 +52,7 @@
       <select id="exportPreset">
         <option value="matches" data-i18n="exportPresetMatches">Matches</option>
         <option value="citation" data-i18n="exportPresetCitation">Citation</option>
+        <option value="legal" data-i18n="exportPresetLegal">Legal</option>
         <option value="research" data-i18n="exportPresetResearch">Research</option>
         <option value="resume" data-i18n="exportPresetResume">Resume</option>
       </select>
@@ -65,8 +67,31 @@
         <option value="ieee">IEEE</option>
         <option value="vancouver">Vancouver</option>
         <option value="ama">AMA</option>
-        <option value="bluebook">Bluebook</option>
         <option value="plain" data-i18n="exportStylePlain">Plain</option>
+      </select>
+      <select id="exportLegalStyle" hidden>
+        <option value="bluebook">Bluebook (US)</option>
+        <option value="oscola">OSCOLA (UK)</option>
+        <option value="mcgill">McGill (Canada)</option>
+        <option value="aglc">AGLC (Australia)</option>
+        <option value="india">SCC / AIR (India)</option>
+        <option value="de">BGH / BVerfG (Deutschland)</option>
+        <option value="at">OGH / VfGH (Österreich)</option>
+        <option value="ch">BGE (Schweiz)</option>
+        <option value="fr">Cass. / CE (France)</option>
+        <option value="it">Cass. / Corte cost. (Italia)</option>
+        <option value="es">STS / STC (España)</option>
+        <option value="eu">CJEU / ECHR (EU)</option>
+        <option value="br">STF / STJ (Brasil)</option>
+        <option value="pt">STJ / TC (Portugal)</option>
+        <option value="jp">最高裁 (日本)</option>
+        <option value="kr">대법원 (한국)</option>
+        <option value="cn">最高人民法院 (中国)</option>
+        <option value="ru">КС / ВС РФ (Россия)</option>
+        <option value="ar">الطعن (عربي)</option>
+        <option value="ag">CSJN (Argentina)</option>
+        <option value="mx">SCJN (México)</option>
+        <option value="co">Corte Constitucional (Colombia)</option>
       </select>
     </label>
     <label class="export-mode">
@@ -99,7 +124,7 @@
     </details>
     <details class="pdf-help" id="exportHelp">
       <summary data-i18n="popupExportHelpTitle">Export help</summary>
-      <p class="hint" data-i18n="popupHintExportHelp">Format: Matches lists every hit. Citation adds a formatted reference (APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA, Bluebook or Plain) and an in-text citation after each quote. Research adds the author, date, source and section for each passage. Resume shows which terms were found, with counts, and where.</p>
+      <p class="hint" data-i18n="popupHintExportHelp">Format: Matches lists every hit. Citation adds a formatted reference (APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA, Bluebook, OSCOLA, McGill, AGLC, SCC/AIR, BGH/BVerfG or Plain) and an in-text citation after each quote. Research adds the author, date, source and section for each passage. Resume shows which terms were found, with counts, and where. Click the button once to collect the content (it may take a moment on long pages or PDFs); when it reads “Export ready: click to copy”, click it again to copy the result, then paste it where you need it.</p>
     </details>
     <details class="pdf-help" id="listsHelp">
       <summary data-i18n="popupListsHelpTitle">Saved lists help</summary>

@@ -160,8 +160,8 @@
     "description": "Tooltip for the button that moves the floating bar to another screen corner."
   },
   "barClose": {
-    "message": "Close",
-    "description": "Tooltip for the button that closes the floating on-page bar."
+    "message": "Hide bar",
+    "description": "Tooltip for the button that hides the floating on-page bar (highlights stay on)."
   },
   "popupExportBtn": { "message": "Copy matches" },
   "exportWorking": { "message": "Collecting…" },
@@ -194,7 +194,7 @@
     "description": "Summary/title for the collapsible export help section."
   },
   "popupHintExportHelp": {
-    "message": "Format: Matches lists every hit. Citation adds a formatted reference (APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA, Bluebook or Plain) and an in-text citation after each quote. Research adds the author, date, source and section for each passage. Resume shows which terms were found, with counts, and where.",
+    "message": "Format: Matches lists every hit. Citation adds a formatted reference (APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA or Plain) and an in-text citation after each quote. Legal is for court decisions: pick a country's style (US Bluebook, UK OSCOLA, Canada McGill, Australia AGLC, India, Germany, Austria, Switzerland, France, Italy, Spain, EU, Brazil, Portugal, Japan, Korea, China, Russia, Arabic courts, Argentina, Mexico, Colombia) and each passage gets that country's case citation. Research adds the author, date, source and section for each passage. Resume shows which terms were found, with counts, and where. Click the button once to collect the content (it may take a moment on long pages or PDFs); when it reads “Export ready: click to copy”, click it again to copy the result, then paste it where you need it.",
     "description": "Help text for the export Format presets."
   },
   "popupListsHelpTitle": {
@@ -210,16 +210,26 @@
   "exportPresetCitation": { "message": "Citation" },
   "popupExportStyle": { "message": "Style" },
   "exportStylePlain": { "message": "Plain" },
+  "exportStyleLegal": { "message": "Legal" },
   "exportCiteTitle": { "message": "Citations" },
   "exportCiteQuotes": { "message": "Quotes" },
   "exportCiteReference": { "message": "Reference" },
   "exportPresetResearch": { "message": "Research" },
   "exportPresetResume": { "message": "Resume" },
+  "exportPresetLegal": { "message": "Legal" },
   "exportResearchTitle": { "message": "Research notes" },
   "exportResearchAuthor": { "message": "Author" },
   "exportResearchDate": { "message": "Year" },
   "exportResumeTitle": { "message": "Resume screen" },
   "exportResumeCoverage": { "message": "Coverage" },
   "exportResumeOther": { "message": "Other" },
-  "barDisable": { "message": "Turn HueMark off" }
+  "barDisable": { "message": "Turn off for this tab" },
+  "barDisablePdf": { "message": "Turn off for this PDF" },
+  "barEnable": { "message": "Turn on for this tab" },
+  "barEnablePdf": { "message": "Turn on for this PDF" },
+  "popupEnabledTab": { "message": "Enabled for this tab" },
+  "popupEnabledPdf": { "message": "Enabled for this PDF" },
+  "popupOffHint": { "message": "HueMark is off on this tab. Turn it on to highlight." },
+  "exportOff": { "message": "Off on this tab" },
+  "actionTitleOn": { "message": "HueMark (on for this tab)" }
 }

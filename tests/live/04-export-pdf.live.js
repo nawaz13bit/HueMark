@@ -1,3 +1,4 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // Markdown export (web + PDF) via the background flow, and PDF highlighting in the bundled viewer.
 // Hidden-tab PDF rendering and real clipboard/badge UX stay manual (see TASKLIST.md).
 const { createRunner, waitFor, startServer, launch, setStorage, mkTerms, markCount, anyHighlights, makePdf } = require("./lib");

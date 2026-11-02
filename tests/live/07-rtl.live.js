@@ -1,3 +1,4 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // RTL layout: Arabic UI locale gives dir=rtl on the popup (via @@bidi_dir). Skips cleanly if
 // headless Chromium does not switch the extension's i18n locale (then it stays manual B8).
 const { createRunner, launch } = require("./lib");

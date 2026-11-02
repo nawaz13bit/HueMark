@@ -1,3 +1,4 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // Export presets (Matches/Citation/Research/Resume), all nine citation styles, and
 // localization: every locale file has the same keys, and the popup renders translated
 // preset names. Runs on BROWSER=chromium (default) or msedge.
@@ -5,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const { createRunner, waitFor, startServer, launch, setStorage, mkTerms, markCount, EXT_PATH } = require("./lib");
 
-const STYLES = ["apa", "mla", "chicago", "harvard", "ieee", "vancouver", "ama", "bluebook", "plain"];
+const STYLES = ["apa", "mla", "chicago", "harvard", "ieee", "vancouver", "ama", "bluebook", "oscola", "mcgill", "aglc", "india", "de", "plain"];
 const WEB = `<!doctype html><html><head><meta charset="utf-8"><title>Cite Me</title>
 <meta name="author" content="Jane Doe"><meta name="citation_publication_date" content="2024/03/05"></head><body>
 <h2>Skills</h2><p>Worked with python and rust daily. The python team shipped rust tooling.</p></body></html>`;
@@ -176,8 +177,17 @@ const ACCENT = `<!doctype html><html><head><meta charset="utf-8"><title>Café É
     // ---- popup preset UI
     const popup = await ext.ctx.newPage();
     await popup.goto(ext.popupUrl);
-    await t.check("Format select offers 4 presets; Style select offers 9 styles", async () =>
-      (await popup.locator("#exportPreset option").count()) === 4 && (await popup.locator("#exportStyle option").count()) === 9);
+    await t.check("Format select offers 5 presets; Style select offers 8 styles; Legal style select offers 22", async () =>
+      (await popup.locator("#exportPreset option").count()) === 5 && (await popup.locator("#exportStyle option").count()) === 8
+      && (await popup.locator("#exportLegalStyle option").count()) === 22);
+    await t.check("Legal preset shows only the legal style select; Citation hides it", async () => {
+      const vis = (id) => popup.evaluate((i) => getComputedStyle(document.getElementById(i)).display !== "none", id);
+      await popup.locator("#exportPreset").selectOption("legal");
+      const a = (await vis("exportLegalStyle")) && !(await vis("exportStyle"));
+      await popup.locator("#exportPreset").selectOption("citation");
+      const b = !(await vis("exportLegalStyle")) && (await vis("exportStyle"));
+      return a && b;
+    });
     await t.check("Citation preset shows Style; Matches hides it", async () => {
       await popup.locator("#exportPreset").selectOption("citation");
       // Check what is actually rendered (computed display), not just the hidden attribute.
@@ -203,7 +213,7 @@ const ACCENT = `<!doctype html><html><head><meta charset="utf-8"><title>Café É
       await p.goto(e2.popupUrl);
       await t.check(`popup shows localized Format options (${loc})`, async () => {
         const opts = await p.locator("#exportPreset option").allTextContents();
-        return opts.length === 4 && opts.some((o) => o.includes(word)) && !opts.includes("Matches");
+        return opts.length === 5 && opts.some((o) => o.includes(word)) && !opts.includes("Matches");
       });
     } finally { await e2.close(); }
   }

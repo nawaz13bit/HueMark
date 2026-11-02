@@ -17,10 +17,14 @@ page.
   go stale.
 - PDFs — both online (http/https) and local PDF files, via a bundled PDF.js
   viewer.
+- Iframes and shadow DOM — matches inside embedded frames and shadow roots
+  are highlighted too, and a tick on the scroll bar marks each match.
 
 **Stays with you**
 - Your term list and colors are saved and re-applied automatically every
   time you revisit a page or reopen the browser.
+- Save several term lists under a name (up to 10) and switch between them
+  in the popup.
 - A colorblind-friendly palette is one click away in the popup.
 
 **Keyboard-first navigation**
@@ -32,26 +36,67 @@ page.
   time: visit `chrome://extensions/shortcuts` and set them there if they
   don't fire out of the box.
 
+**Smarter matching**
+- Wildcards (`*`, `?`) and regular expressions (`/pattern/`).
+- Accents are ignored automatically, with no setting to turn it off. Letters
+  such as ß, ł, đ and œ are handled too.
+- Right-click a selected word and choose "Add selection to HueMark" to add it
+  as a term.
+
+**Copy matches**
+- Click once to collect the matches, then again to copy them with the text
+  around each one. The result pastes as rich text or plain text.
+- Choose Snippet, Sentence or Paragraph for how much text surrounds each
+  match.
+- Citation styles: APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA, or Plain.
+- Web quotes get scroll-to-text links; PDF quotes get page numbers.
+- Nothing leaves your device. The result waits in browser session storage
+  until you copy it.
+
+**Legal citations**
+- A Legal format with 22 jurisdiction options, such as Bluebook (US), OSCOLA
+  (UK) and McGill (Canada).
+- Checked against real court pages for several jurisdictions; the rest are
+  less tested.
+- Legal formats follow common practice and are not checked against official
+  style guides.
+- Anything not recognised as a case gets a web citation instead.
+
 **Privacy**
-- No data collection, no analytics, no external servers. Your search terms
-  and colors are stored locally on your device (`chrome.storage.local`) and
-  never leave it.
+- No data collection, no analytics, no external servers. Your search terms,
+  saved lists and colors are stored locally on your device
+  (`chrome.storage.local`) and never leave it.
+- HueMark is off in every tab until you switch it on for that tab. It remembers
+  which tabs are on as an in-memory list of tab numbers only: no site
+  addresses, titles or history are stored.
+- Copy matches reads the text of the page you're on only when you use it, and
+  copies to your clipboard only when you click Copy.
 
 **Good to know**
+- HueMark is switched on per tab. New tabs start off: open the popup and turn
+  on "Enabled for this tab" (or use the ⏻ button on the floating bar). After
+  updating from an earlier version, switch it on again in the tabs you want.
 - Works on any page whose text lives in the real DOM — the vast majority of
   the web.
 - Canvas-rendered apps (Google Docs, Google Sheets) can't be highlighted by
   any browser extension, HueMark included — their content is drawn to a
   canvas, not real DOM text.
+- In some Wikipedia equations, copied sub- and superscripts run together
+  (e.g. "CO 2carbondioxide").
 
 ## Full description (Firefox AMO variant)
 
 Same as above, except the Privacy bullet reads:
 
 **Privacy**
-- No data collection, no analytics, no external servers. Your search terms
-  and colors are stored locally in your browser and never leave your
-  device.
+- No data collection, no analytics, no external servers. Your search terms,
+  saved lists and colors are stored locally in your browser and never leave
+  your device.
+- HueMark is off in every tab until you switch it on for that tab. It remembers
+  which tabs are on as an in-memory list of tab numbers only: no site
+  addresses, titles or history are stored.
+- Copy matches reads the text of the page you're on only when you use it, and
+  copies to your clipboard only when you click Copy.
 
 (Genericized from the Chrome/Edge listing's `chrome.storage.local`
 wording — accurate for Firefox too since it aliases `chrome.*` to
@@ -64,14 +109,18 @@ Productivity / Accessibility
 
 ## Permission justifications (for store review forms)
 
-- **storage** — save the user's term list, colors, and settings so
-  highlights persist across sessions and reloads.
-- **scripting** — inject the highlighting engine into pages on demand.
+- **storage** — save the user's term lists (including saved lists), colors,
+  and settings so highlights persist across sessions and reloads; hold the
+  result of a Copy matches run until it is copied.
+- **scripting** — inject the highlighting engine into pages on demand, and
+  read the page's text (including frames) when the user clicks Copy matches.
 - **activeTab** — apply highlights to the page the user is currently
   viewing.
 - **declarativeNetRequest** — redirect PDF navigations to the bundled
   PDF.js viewer, since browsers don't allow third-party scripts inside
   their built-in PDF viewers.
+- **contextMenus** — add an "Add selection to HueMark" item to the right-click
+  menu for selected text. Nothing else is read through it.
 - **host permissions (`<all_urls>`)** — HueMark is a general-purpose
   highlighter with no fixed set of target domains: users add their own
   search terms and expect them highlighted automatically on any page or
@@ -95,47 +144,45 @@ How to test:
 1. Click the toolbar icon to open the popup.
 2. Type a word or phrase into the term field and pick a color; add more
    terms with the "+" button, each gets its own color.
-3. Matches are highlighted immediately on the current page. Reload the
-   page or navigate elsewhere and back — highlights reapply automatically
-   from saved state.
-4. Open a PDF (e.g. any http(s) link ending in .pdf, or via "Open local
-   PDF..." in the popup) — the same terms highlight inside the bundled
-   PDF.js viewer.
-5. Alt+Shift+Up/Down jumps between matches; Alt+Shift+Left/Right cycles
-   which term is active. A floating bar (Alt+Shift+B or the toolbar
-   command) offers the same controls without opening the popup. Note:
-   Chrome doesn't always auto-bind these `suggested_key` defaults for
-   unpacked/dev-mode-installed extensions with multiple custom commands —
-   if a shortcut doesn't fire, assign it manually at
-   `chrome://extensions/shortcuts`.
+3. Matches highlight immediately. Reload or navigate away and back;
+   highlights reapply from saved state.
+4. Open a PDF (any http(s) .pdf link, or "Open local PDF..." in the popup);
+   the same terms highlight in the bundled PDF.js viewer.
+5. Alt+Shift+Up/Down jumps between matches; Alt+Shift+Left/Right cycles the
+   active term; Alt+Shift+B opens a floating bar. Chrome doesn't always
+   auto-bind these defaults for dev-mode extensions with several commands;
+   if a shortcut doesn't fire, set it at `chrome://extensions/shortcuts`.
+6. Copy matches (popup): click once to collect, again to copy. The popup
+   can be closed while collecting.
+7. Right-click a selected word and choose "Add selection to HueMark".
 
-Why broad host permissions (`<all_urls>`) are requested: HueMark has no
-fixed set of target sites — users choose their own search terms and
-expect them highlighted on any page or PDF they visit, including after
-reload/revisit and as new content streams in on dynamic pages (a
-MutationObserver watches for DOM changes). `activeTab` can't support this
-because its grant is per-gesture and doesn't survive reload or
-navigation, which would break the core "highlights persist" behavior.
-Broad host access is also needed for `declarativeNetRequest`, which
-redirects PDF navigations (any domain) to the bundled PDF.js viewer,
-since browsers block third-party scripts inside their built-in PDF
-viewer.
+Why broad host permissions (`<all_urls>`): users choose their own terms and
+expect them highlighted on any page or PDF, including after reload and as
+content streams into dynamic pages (a MutationObserver watches for DOM
+changes). `activeTab` is per-gesture and doesn't survive reload or
+navigation, which would break the "highlights persist" behavior.
+`declarativeNetRequest` also needs broad host access to redirect PDF
+navigations (any domain) to the bundled PDF.js viewer, since browsers block
+third-party scripts inside their built-in PDF viewer.
 
-Privacy: no data collection, no analytics, no remote servers. All terms,
-colors, and settings are stored locally via `chrome.storage.local` and
-never transmitted anywhere. Source is public:
-https://github.com/nawaz13bit/HueMark
+Privacy: no data collection, analytics, or remote servers. Terms, saved
+lists, colors and settings stay in `chrome.storage.local` and are never
+transmitted. Which tabs are switched on is kept as tab numbers only in
+`chrome.storage.session` (memory, no URLs). Copy matches reads the open tab only when used and writes to
+the clipboard only on Copy. Source: https://github.com/nawaz13bit/HueMark
 
 ## Notes to Reviewer (Firefox AMO)
 
 HueMark is a multi-color text/keyword highlighter for web pages and PDFs.
 No login, no account, no backend. Extension id: `huemark@fnawaz.dev`.
 
-Test: click the toolbar icon, add a term + color. Matches highlight
-immediately and persist across reload/nav. Open any http(s) .pdf, or
+Test: click the toolbar icon, turn on "Enabled for this tab" (HueMark is off
+per tab by default), add a term + color. Matches highlight immediately and
+persist across reload/nav in that tab. Open any http(s) .pdf, or
 "Open local PDF..." in the popup, to see terms highlighted in the
 bundled PDF.js viewer. Alt+Shift+Up/Down/Left/Right nav; Alt+Shift+B for
-a floating bar.
+a floating bar. Copy matches (popup) and right-click "Add selection to
+HueMark" (contextMenus) are also available.
 
 `<all_urls>` + `declarativeNetRequest`: users pick their own terms and
 expect them highlighted on any site/PDF, incl. after reload (activeTab
@@ -159,8 +206,11 @@ unrelated, in unpatched `vendor/pdfjs/` code: PDF.js's own dynamic
 loading of its worker/sandbox/debug bundles and l10n templating, all
 resolving to bundled files/JSON, never remote/user data.
 
-Privacy: no data collection/analytics/remote servers. Terms/colors
-stored locally (Firefox aliases `chrome.*` to `browser.*`). Source:
+Privacy: no data collection/analytics/remote servers. Terms, saved lists
+and colors stored locally (Firefox aliases `chrome.*` to `browser.*`). Tab
+on/off state is tab numbers only, in session (memory) storage. Copy
+matches reads the open tab's text only on request and writes to the
+clipboard only on Copy. Source:
 https://github.com/nawaz13bit/HueMark
 
 ## Screenshots (in `screenshots/store/`, ready to upload — 1280x800, letterboxed via `scripts/resize-screenshots.ps1`)

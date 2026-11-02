@@ -3,10 +3,64 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!existing.huemark_terms) {
     await chrome.storage.local.set({
       huemark_terms: [],
-      huemark_options: { enabled: true, wholeWord: false }
+      huemark_options: { wholeWord: false }
     });
   }
 });
+
+// Per-tab on/off. Every tab starts OFF; the set of tab ids switched on lives only in session storage
+// (memory, never disk) and holds no URLs, hostnames or titles. If session storage is missing the set
+// is kept in this worker's memory only - it is never written to chrome.storage.local.
+const TABS_ON_KEY = "huemark_tabs_on";
+const tabsStore = chrome.storage.session || null;
+let tabsOnMemory = [];
+let tabsOnQueue = Promise.resolve();
+
+async function readTabsOn() {
+  if (!tabsStore) return tabsOnMemory;
+  const v = (await tabsStore.get(TABS_ON_KEY))[TABS_ON_KEY];
+  return Array.isArray(v) ? v : [];
+}
+
+// Serialised read-modify-write so two quick changes can't overwrite each other.
+function updateTabsOn(fn) {
+  const run = tabsOnQueue.then(async () => {
+    const next = fn(await readTabsOn());
+    if (tabsStore) await tabsStore.set({ [TABS_ON_KEY]: next });
+    else tabsOnMemory = next;
+    return next;
+  });
+  tabsOnQueue = run.catch(() => {});
+  return run;
+}
+
+async function isTabOn(tabId) {
+  await tabsOnQueue;
+  return (await readTabsOn()).includes(tabId);
+}
+
+async function setTabOn(tabId, on) {
+  if (typeof tabId !== "number") return false;
+  await updateTabsOn((list) => {
+    const has = list.includes(tabId);
+    if (on && !has) return [...list, tabId];
+    if (!on && has) return list.filter((id) => id !== tabId);
+    return list;
+  });
+  updateTabTitle(tabId, on);
+  // Every frame in the tab (iframes, the PDF viewer) re-applies its own highlights.
+  chrome.tabs.sendMessage(tabId, { type: "huemark:tabOn", on }, () => void chrome.runtime.lastError);
+  return on;
+}
+
+function updateTabTitle(tabId, on) {
+  try {
+    chrome.action.setTitle({
+      tabId,
+      title: chrome.i18n.getMessage(on ? "actionTitleOn" : "actionTitle")
+    }, () => void chrome.runtime.lastError);
+  } catch (e) { /* tab already gone */ }
+}
 
 // Right-click "add selection to HueMark". Mirrors popup.js's palettes and
 // 6-term cap; the new term gets the first palette color no term uses yet.
@@ -55,28 +109,46 @@ function setExportBadge(text, color) {
   chrome.action.setBadgeText({ text });
 }
 
-chrome.tabs.onRemoved.addListener(async (tabId) => {
+// Tabs with an export in flight. Updated synchronously on begin/done so the async storage read in the
+// handlers below can't delete a result that finished while they were awaiting (check-then-act race).
+const runningExports = new Set();
+
+async function abandonExport(tabId) {
+  if (!runningExports.has(tabId)) return;
   const stored = (await exportStore.get(EXPORT_KEY))[EXPORT_KEY];
+  if (!runningExports.has(tabId)) return; // finished while we were reading
   if (stored?.state === "running" && stored.tabId === tabId) {
+    runningExports.delete(tabId);
     exportStore.remove(EXPORT_KEY);
     chrome.action.setBadgeText({ text: "" });
   }
+}
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  abandonExport(tabId);
+  updateTabsOn((list) => (list.includes(tabId) ? list.filter((id) => id !== tabId) : list)).catch(() => {});
 });
 
 // A reload or navigation kills the collecting page script: don't leave the popup on "Working".
-chrome.tabs.onUpdated.addListener(async (tabId, change) => {
-  if (change.status !== "loading") return;
-  const stored = (await exportStore.get(EXPORT_KEY))[EXPORT_KEY];
-  if (stored?.state === "running" && stored.tabId === tabId) {
-    exportStore.remove(EXPORT_KEY);
-    chrome.action.setBadgeText({ text: "" });
-  }
+chrome.tabs.onUpdated.addListener((tabId, change) => {
+  if (change.status !== "loading" || !runningExports.has(tabId)) return;
+  // PDF.js sets location.hash on every page step, which fires "loading" without reloading the page.
+  // Give a real navigation time to replace the page script, then ask whether the collector is still alive.
+  setTimeout(() => {
+    if (!runningExports.has(tabId)) return;
+    chrome.tabs.sendMessage(tabId, { type: "huemark:exportAlive" }, { frameId: 0 }, (r) => {
+      void chrome.runtime.lastError;
+      if (!r || !r.running) abandonExport(tabId);
+    });
+  }, 1200);
 });
 
-chrome.contextMenus.onClicked.addListener(async (info) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== CONTEXT_MENU_ID || !info.selectionText) return;
   const term = selectionToTerm(info.selectionText);
   if (!term) return;
+  // Adding a term from a page means the user wants it highlighted there.
+  if (tab?.id != null) await setTabOn(tab.id, true);
 
   const data = await chrome.storage.local.get(["huemark_terms", "huemark_options"]);
   const terms = data.huemark_terms || [];
@@ -186,6 +258,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 const pendingLocalPdfs = new Map();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "huemark:getTabOn" || message?.type === "huemark:setTabOn") {
+    const tabId = typeof message.tabId === "number" ? message.tabId : sender.tab?.id;
+    const p = message.type === "huemark:setTabOn" ? setTabOn(tabId, !!message.on) : isTabOn(tabId);
+    p.then((on) => sendResponse({ on: !!on, tabId }), () => sendResponse({ on: false, tabId }));
+    return true;
+  }
   if (message?.type === "huemark:stashLocalPdf") {
     const id = crypto.randomUUID();
     pendingLocalPdfs.set(id, { base64: message.base64, name: message.name });
@@ -200,6 +278,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return;
   }
   if (message?.type === "huemark:exportBegin" && sender.tab && sender.frameId === 0) {
+    runningExports.add(sender.tab.id);
     exportStore.set({ [EXPORT_KEY]: { state: "running", tabId: sender.tab.id } });
     setExportBadge("…", "#888888");
     return;
@@ -209,6 +288,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const total = data ? data.rows.length + (data.frames || []).reduce((n, f) => n + f.rows.length, 0) : 0;
     const state = !data ? "failed" : total === 0 && !data.scanned ? "none" : "ready";
     const tabId = sender.tab.id;
+    runningExports.delete(tabId);
     const entry = { state, tabId, data: state === "ready" ? data : null, names: message.names || [] };
     const failed = { state: "failed", tabId, data: null, names: message.names || [] };
     // A very large result can exceed the storage quota: report failure instead of staying on "running".

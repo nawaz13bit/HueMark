@@ -1,3 +1,4 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // Popup under every one of the 13 UI locales: each data-i18n element shows its translated
 // message (not English), nothing overflows horizontally (long de/ru/fr strings), RTL for ar.
 // Screenshots (help sections opened) go to tests/live/shots/ (gitignored) for a visual look.

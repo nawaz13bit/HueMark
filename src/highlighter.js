@@ -485,7 +485,12 @@ function adoptSheet(root) {
 
 function syncHighlightStyles(keys, colors) {
   const sig = keys.map((k) => `${k}=${colors.get(k)}`).join("|");
-  if (highlightSheet && sig === sheetSignature) return;
+  if (highlightSheet && sig === sheetSignature) {
+    // Pages that reassign adoptedStyleSheets drop our sheet; re-adopt it (cheap no-op when still present).
+    adoptSheet(document);
+    shadowRoots.forEach(adoptSheet);
+    return;
+  }
   sheetSignature = sig;
   const rules = keys.map((k, i) => {
     const bg = colors.get(k) || "#ffff00";

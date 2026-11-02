@@ -4,3 +4,4 @@ marketing-strategy.md
 competitor-analysis.md
 node_modules/
 tests/live/shots/
+.claude/scheduled_tasks.lock

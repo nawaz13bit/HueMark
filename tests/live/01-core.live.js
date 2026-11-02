@@ -1,5 +1,6 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // Core highlighting on a real page: matching, options, enable/disable, dynamic content.
-const { createRunner, waitFor, startServer, launch, setStorage, mkTerms, markCount, anyHighlights } = require("./lib");
+const { createRunner, waitFor, startServer, launch, setStorage, setTabOn, mkTerms, markCount, anyHighlights } = require("./lib");
 
 const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>core</title></head><body>
 <h1>Cafe society</h1>
@@ -59,15 +60,15 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>core</titl
     // enabled toggle
     await setStorage(ext, { huemark_terms: mkTerms("fox"), huemark_options: { enabled: true, wholeWord: false } });
     await waitFor(() => markCount(page, "fox"));
-    await setStorage(ext, { huemark_options: { enabled: false, wholeWord: false } });
-    await t.check("Enabled off clears highlights and hides the bar", async () =>
+    await setTabOn(ext, page, false);
+    await t.check("Tab off clears highlights and hides the bar", async () =>
       (await waitFor(async () => (await anyHighlights(page)) === 0)) &&
       (await page.evaluate(() => {
         const h = document.getElementById("huemark-float-bar-host");
         return !h || h.style.display === "none";
       })));
-    await setStorage(ext, { huemark_options: { enabled: true, wholeWord: false } });
-    await t.check("Enabled back on restores highlights", async () =>
+    await setTabOn(ext, page, true);
+    await t.check("Tab back on restores highlights", async () =>
       (await waitFor(async () => (await markCount(page, "fox")) === 4)));
 
     // dynamic content
