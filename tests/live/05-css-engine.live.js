@@ -1,3 +1,4 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // CSS Custom Highlight fallback engine: forced switch when a page keeps removing our <mark>s,
 // ranges painted via CSS.highlights, current-match range, scrollbar ticks, export in CSS mode.
 const { createRunner, waitFor, startServer, launch, setStorage, mkTerms, markCount, anyHighlights } = require("./lib");

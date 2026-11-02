@@ -1,6 +1,7 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // Iframes (same-origin, cross-origin, srcdoc, about:blank) and shadow DOM (open + closed).
 // Covers the manual-queue items that CAN be automated; see TASKLIST.md for what stays manual.
-const { createRunner, waitFor, startServer, launch, setStorage, mkTerms, markCount, anyHighlights } = require("./lib");
+const { createRunner, waitFor, startServer, launch, setStorage, setTabOn, mkTerms, markCount, anyHighlights } = require("./lib");
 
 const MAIN = (srv) => `<!doctype html><html><head><meta charset="utf-8"><title>frames</title></head><body>
 <p>top: needle one</p>
@@ -46,8 +47,8 @@ const INNER = `<!doctype html><html><body><p>inner frame needle needle</p></body
     await t.check("top document highlighted", async () => (await markCount(page, "needle")) >= 1);
     await t.check("same-origin iframe highlighted (2 matches)", async () =>
       (await markCount(await frameByName("#same"), "needle")) === 2);
-    // KNOWN INTERMITTENT (~1 in 5 runs, headless Chromium): the localhost frame is sometimes
-    // never highlighted, not a timing delay (12s wait doesn't help). Cause unverified; see TASKLIST.md.
+    // Was intermittent (~20% of runs): the cross-origin frame's first scan ran before it had layout
+    // (body.checkVisibility() false -> all text "hidden"). Fixed by rescanIfNowVisible() in content.js.
     await t.check("cross-origin iframe highlighted (2 matches)", async () =>
       (await waitFor(async () => (await markCount(await frameByName("#cross"), "needle")) === 2)));
     await t.check("srcdoc iframe highlighted (match_about_blank)", async () =>
@@ -103,8 +104,8 @@ const INNER = `<!doctype html><html><body><p>inner frame needle needle</p></body
       (await waitFor(async () => (await markCount(await frameByName("#late"), "needle")) === 1, { timeout: 8000 })));
 
     // Disable clears frames too.
-    await setStorage(ext, { huemark_options: { enabled: false, wholeWord: false } });
-    await t.check("Enabled off clears top + same + cross-origin frames", async () => {
+    await setTabOn(ext, page, false);
+    await t.check("Tab off clears top + same + cross-origin frames", async () => {
       const ok = await waitFor(async () =>
         (await anyHighlights(page)) === 0 &&
         (await anyHighlights(await frameByName("#same"))) === 0 &&

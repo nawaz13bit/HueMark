@@ -8,7 +8,7 @@ Only what the viewer needs at runtime is kept:
 - `build/pdf.mjs`, `build/pdf.worker.mjs`, `build/pdf.sandbox.mjs`
 - `web/` (viewer.html, viewer.mjs, viewer.css, cmaps, iccs, images, locale, standard_fonts, wasm)
 
-`web/locale` was trimmed to the locales HueMark ships strings for (see git history if restoring the full set is ever needed).
+`web/locale` was trimmed to the 13 PDF.js folders that match HueMark's own `_locales/` set: `ar`, `de`, `en-US`, `es-ES`, `fr`, `hi-IN`, `it`, `ja`, `ko`, `pt-BR`, `ru`, `zh-CN`, `zh-TW`, plus `locale.json`. `locale.json` is kept exactly as upstream, so it still lists every PDF.js language; only the folders for the other languages are missing. Restore the full set from the upstream dist (or git history) if more languages are ever wanted. When re-vendoring, keep only these folders (tests/live/09-presets-locale checks that they exist).
 
 ## Patches applied to `web/viewer.mjs`
 

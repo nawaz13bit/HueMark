@@ -4,13 +4,21 @@
 const { waitFor, launch, setStorage, mkTerms } = require("./lib");
 
 const [url, termArg, mode = "sentence", styleArg] = process.argv.slice(2);
-const STYLES = styleArg ? styleArg.split(",") : ["apa", "mla", "chicago", "harvard", "ieee", "vancouver", "ama", "bluebook", "plain"];
+const STYLES = styleArg ? styleArg.split(",") : ["apa", "mla", "chicago", "harvard", "ieee", "vancouver", "ama", "bluebook", "oscola", "mcgill", "aglc", "india", "de", "at", "ch", "fr", "it", "es", "eu", "br", "pt", "jp", "kr", "cn", "ru", "ar", "ag", "mx", "co", "plain"];
 const names = termArg.split(",");
 
 (async () => {
-  const ext = await launch();
+  // HEADED=1 shows the browser; some sites (EUR-Lex, High Court of Australia) only let a headed client through.
+  const ext = await launch({ headless: !process.env.HEADED });
   try {
     await setStorage(ext, { huemark_terms: mkTerms(...names), huemark_options: { enabled: true, wholeWord: true } });
+    // Browser-like headers so sites that block the default headless client let the page through.
+    await ext.ctx.setExtraHTTPHeaders({
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+      "Accept-Language": process.env.ACCEPT_LANG || "en-US,en;q=0.9",
+      "Upgrade-Insecure-Requests": "1",
+    });
     const page = await ext.ctx.newPage();
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 }).catch((e) => console.log("goto:", e.message.split("\n")[0]));
     await new Promise((r) => setTimeout(r, Number(process.env.WAIT_MS) || 6000));

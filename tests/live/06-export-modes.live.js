@@ -1,3 +1,4 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // Export popup controls (mode select, club checkbox, "!" explainer, saved prefs) and
 // sentence/paragraph/club output built from a real collect(). PDF line-gap paragraph
 // guessing with real layouts stays manual (see TASKLIST.md).

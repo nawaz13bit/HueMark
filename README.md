@@ -7,14 +7,33 @@ at once, each in its own color, across:
 - **Dynamically generated pages (SPAs)** — a `MutationObserver` watches for new
   content and highlights it as it appears, so infinite-scroll feeds, chat
   apps, etc. stay highlighted without a manual re-run.
-- **Reload persistence** — your term list is saved via `chrome.storage.sync`,
+- **Iframes and shadow DOM** — matches inside embedded frames and shadow roots
+  are highlighted too, and a tick on the scroll bar marks each match.
+- **Reload persistence** — your term list is saved via `chrome.storage.local`,
   so every page you (re)load auto-applies the same highlights until you clear
   them.
+- **Saved term lists** — save up to 10 named lists and switch between them in
+  the popup.
+- **Matching** — wildcards (`*`, `?`) and regular expressions (`/pattern/`).
+  Accent folding is always on, with no toggle (e.g. ß, ł, đ, œ).
+- **Right-click add** — add a selected word as a term from the context menu.
 - **PDFs** — a bundled PDF.js viewer highlights matches in both local and
-  http(s) PDFs.
+  http(s) PDFs. The popup has an "Open PDF viewer" button.
+- **Copy matches** — collect matches with the text around them, then copy them
+  as rich text and plain text. Formats: Matches, Citation, Legal, Research and
+  Resume. Modes: Snippet, Sentence or Paragraph. Citation styles: APA, MLA,
+  Chicago, Harvard, IEEE, Vancouver, AMA and Plain. Web quotes get
+  scroll-to-text links; PDF quotes get page numbers.
+- **Legal citations** — a Legal format with 22 jurisdiction options. See
+  [Legal citations](#legal-citations).
 - **Keyboard navigation** — jump between matches and cycle terms without
   touching the mouse (`Alt+Shift+Up/Down/Left/Right`, `Cmd+Shift+...` on Mac),
   with a persistent current-match outline so you never lose your place.
+- **Per-tab on/off** — HueMark is off in every tab until you switch it on for
+  that tab (popup switch, or the ⏻ button on the floating bar). Switching off
+  clears that tab's highlights; your terms are kept. Only a list of tab
+  numbers is remembered, in memory, so nothing about the sites you visit is
+  stored. ✕ on the bar just hides the bar.
 - **Colorblind-friendly palette** — toggle an alternate palette tuned for
   colorblind accessibility.
 
@@ -81,6 +100,51 @@ around this by:
 
 Works for both http(s) and local (`file://`) PDFs on Chrome, Edge, and
 Firefox.
+
+## Citation details
+
+The Citation, Research and Legal formats build a reference for the page or
+PDF you collected from:
+
+- **Where the details come from:** scholarly `<meta>` tags first (Highwire
+  `citation_*`, Dublin Core, PRISM), then OpenGraph/Twitter tags, then
+  JSON-LD. Fields used: title, authors, date, journal, volume, issue, pages,
+  publisher and DOI. Organisation authors are kept as one name.
+- **Styles:** APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA and Plain. Pages
+  with a journal and DOI get a journal-article reference (DOI link preferred);
+  everything else gets a web-page reference with the URL and access date.
+- **After each quote:** an in-text citation in the chosen style (APA, MLA and
+  so on). Legal styles put the case citation in the reference instead.
+- **Web quotes** link back to the exact passage with a scroll-to-text link.
+  **PDF quotes** carry page numbers, and a title is guessed when the PDF has
+  none.
+- **Research format** adds author, year, source and section to each passage.
+- Missing details are left out rather than invented. Check the output against
+  your style guide before submitting.
+
+## Legal citations
+
+The **Legal** format in Copy matches formats a case citation in one of 22
+options, such as Bluebook (US), OSCOLA (UK), McGill (Canada) and AGLC
+(Australia). Anything not recognised as a case falls back to the generic
+web-page citation.
+
+Status as of 2026-11-01 (from `tests/live/TASKLIST.md`, sections C and D):
+
+- **Checked on real pages:** France, India, Portugal, UK, Germany,
+  Switzerland, Austria, Spain, Colombia, Korea, Japan, Russia, Canada (McGill),
+  Italy, US (Bluebook), and China (guiding cases only).
+- **Built and tested on fixtures only, no real page checked yet:** EU,
+  Australia (AGLC), Mexico, Brazil, Argentina, Arabic courts, and ordinary
+  China judgment pages.
+- **Not built:** other jurisdictions, for example Ireland, the Netherlands and
+  Chile. These fall back to the generic web-page citation.
+
+Caveats:
+
+- The formats are common practice. They have not been checked against official
+  style guides.
+- Non-English translations are not reviewed by native speakers.
 
 On Firefox, local PDFs must be opened via the popup's "Open local PDF..."
 button, which opens the bundled PDF.js viewer tab — use the viewer's own

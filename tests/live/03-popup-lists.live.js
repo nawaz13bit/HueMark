@@ -1,3 +1,4 @@
+setTimeout(() => { console.error("suite timeout"); process.exit(3); }, 480000).unref();
 // Popup UI driven like a user: typing terms, options, saved lists, clear-all, palette.
 // The popup is opened as a tab (extension page), so it can't read the other tab's counts;
 // highlights on the fixture page are checked instead.

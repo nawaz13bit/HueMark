@@ -10,7 +10,17 @@
   const isTop = window === window.top;
 
   let currentTerms = [];
-  let currentOptions = { enabled: true, wholeWord: false };
+  // Per-tab switch, answered by the background (every tab starts off). enabled is always derived from it.
+  let tabOn = false;
+  let currentOptions = { enabled: false, wholeWord: false };
+  let powerBtn = null;
+  const isPdfViewer = location.href.startsWith(chrome.runtime.getURL("vendor/pdfjs/web/viewer.html"));
+  function refreshPowerBtn() {
+    if (!powerBtn) return;
+    const key = tabOn ? (isPdfViewer ? "barDisablePdf" : "barDisable") : (isPdfViewer ? "barEnablePdf" : "barEnable");
+    powerBtn.title = chrome.i18n.getMessage(key);
+    powerBtn.style.opacity = tabOn ? "" : "0.55";
+  }
   let observer = null;
   let debounceHandle = null;
 
@@ -65,9 +75,22 @@
   let lastAppliedTermsJSON = null;
   let lastAppliedOptionsJSON = null;
 
+  // A cross-origin iframe's script can run its first scan before the frame has
+  // any layout (body.checkVisibility() === false), so every text node is skipped
+  // as hidden and no DOM mutation follows when the parent later sizes the frame.
+  // Remember that the scan happened in that state and redo it once it's visible.
+  const bodyVisible = () =>
+    !document.body || !document.body.checkVisibility ||
+    document.body.checkVisibility({ checkOpacity: false, checkVisibilityCSS: true });
+  let scannedWhileHidden = false;
+  function rescanIfNowVisible() {
+    if (scannedWhileHidden && bodyVisible()) applyState();
+  }
+
   function applyState() {
     clearHighlights(document.body);
     currentMarkEl = null; // old <mark> elements are gone, nothing to un-mark
+    scannedWhileHidden = !!currentOptions.enabled && !bodyVisible();
     if (currentOptions.enabled) runFullHighlight();
     rebuildMatchGroups();
     syncBarWords();
@@ -481,10 +504,10 @@
     markerLayer.replaceChildren(frag);
   }
 
-  window.addEventListener("resize", scheduleMarkers);
+  window.addEventListener("resize", () => { rescanIfNowVisible(); scheduleMarkers(); });
   // Page height changes (images loading, content expanding) shift every
   // match's fraction without any mutation we'd otherwise react to.
-  new ResizeObserver(scheduleMarkers).observe(document.documentElement);
+  new ResizeObserver(() => { rescanIfNowVisible(); scheduleMarkers(); }).observe(document.documentElement);
 
   const OBS_OPTS = {
     childList: true,
@@ -769,18 +792,22 @@
       closeDropdown();
     });
 
-    // Power: turns HueMark off globally (same setting as the popup switch).
-    const powerBtn = document.createElement("button");
+    // Power: switches HueMark on/off for this tab only (same switch as the popup's).
+    powerBtn = document.createElement("button");
     powerBtn.type = "button";
     powerBtn.textContent = "⏻";
-    powerBtn.title = chrome.i18n.getMessage("barDisable");
-    powerBtn.addEventListener("click", async () => {
-      barClosed = true;
-      barHost.style.display = "none";
-      closeDropdown();
-      const { huemark_options } = await chrome.storage.local.get("huemark_options");
-      await chrome.storage.local.set({ huemark_options: { ...(huemark_options || {}), enabled: false } });
+    powerBtn.addEventListener("click", () => {
+      const turnOn = !tabOn;
+      if (!turnOn) {
+        barClosed = true;
+        barHost.style.display = "none";
+        closeDropdown();
+      }
+      try {
+        chrome.runtime.sendMessage({ type: "huemark:setTabOn", on: turnOn }, () => void chrome.runtime.lastError);
+      } catch (_) {}
     });
+    refreshPowerBtn();
 
     nav.append(barUpBtn, barDownBtn, barCountEl, moveBtn, powerBtn, closeBtn);
     bar.append(combo, nav);
@@ -983,15 +1010,34 @@
   let exportRunning = false;
 
   function loadStateAndRun() {
+    // Per-tab switch: every tab starts off; the background keeps the set of tabs turned on (session memory).
+    let tabAnswered = false;
+    let data = null;
+    const go = () => {
+      if (!tabAnswered || !data) return;
+      currentTerms = data.huemark_terms || [];
+      currentOptions = { wholeWord: false, ...(data.huemark_options || {}), enabled: tabOn };
+      if (BAR_CORNERS.includes(data.huemark_bar_position)) barPosition = data.huemark_bar_position;
+      applyState();
+    };
+    try {
+      chrome.runtime.sendMessage({ type: "huemark:getTabOn" }, (r) => {
+        void chrome.runtime.lastError;
+        tabOn = !!r?.on;
+        tabAnswered = true;
+        go();
+      });
+    } catch (_) { tabAnswered = true; }
     chrome.storage.local.get(
       ["huemark_terms", "huemark_options", "huemark_bar_position"],
-      (data) => {
-        currentTerms = data.huemark_terms || [];
-        currentOptions = { enabled: true, wholeWord: false, ...(data.huemark_options || {}) };
-        if (BAR_CORNERS.includes(data.huemark_bar_position)) barPosition = data.huemark_bar_position;
-        applyState();
-      }
+      (d) => { data = d || {}; go(); }
     );
+  }
+
+  function setTabOnLocal(on) {
+    tabOn = !!on;
+    currentOptions = { ...currentOptions, enabled: tabOn };
+    applyState();
   }
 
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -1017,7 +1063,7 @@
       currentTerms = nextTerms;
     }
     if (changes.huemark_options) {
-      const nextOptions = { enabled: true, wholeWord: false, ...(changes.huemark_options.newValue || {}) };
+      const nextOptions = { wholeWord: false, ...(changes.huemark_options.newValue || {}), enabled: tabOn };
       if (JSON.stringify(nextOptions) !== lastAppliedOptionsJSON) needsHighlightRefresh = true;
       currentOptions = nextOptions;
     }
@@ -1040,8 +1086,15 @@
       else answer();
       return true;
     }
+    if (msg?.type === "huemark:exportAlive") { sendResponse({ running: exportRunning }); return; }
+    if (msg?.type === "huemark:tabOn") {
+      if (!!msg.on !== tabOn) setTabOnLocal(msg.on);
+      refreshPowerBtn();
+      return;
+    }
     if (msg?.type === "huemark:export") {
       if (!window.__huemarkExport) { sendResponse(null); return; }
+      if (!tabOn) { sendResponse({ started: false, off: true }); return; }
       // Acknowledge at once and report through the background instead of the
       // response: the popup that asked may be closed long before a big PDF
       // finishes, and the background keeps the result until the popup returns.
@@ -1057,7 +1110,7 @@
       (async () => {
         const data = await window.__huemarkExport.collect();
         data.frames = hasChildFrames()
-          ? ((await relay({ type: "huemark:frameExport" })) || []).map((f) => f.result).filter((r) => r && r.rows.length)
+          ? ((await relay({ type: "huemark:frameExport" })) || []).slice().sort((a, b) => a.frameId - b.frameId).map((f) => f.result).filter((r) => r && r.rows.length)
           : [];
         return data;
       })().then(finish, () => finish(null));
