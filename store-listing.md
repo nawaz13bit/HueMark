@@ -246,6 +246,16 @@ in the store's Privacy Practices tab to match.)
 
 ## Version notes (Firefox AMO submission form)
 
+Version 0.2.0. HueMark is now off in every tab until you switch it on for
+that tab (popup switch or the bar's power button). After updating, turn it
+on again in the tabs you want. New: "Copy matches" exports your matches as
+Markdown in Matches, Citation, Legal, Research or Resume format; saved term
+lists (up to 10); wildcard (* ?) and /regex/ terms; accent-insensitive
+matching; right-click "Add selection to HueMark" (new contextMenus
+permission); highlights inside iframes and shadow DOM; a scroll-bar tick
+for each match; arXiv PDF links open in the bundled viewer; PDF.js 6.4.299.
+The global on/off checkbox and the "Open local PDF..." button were removed.
+
 Initial release (0.1.0). Multi-color text/keyword highlighter for web
 pages and PDFs, with a bundled PDF.js viewer, keyboard navigation
 between matches, persistent highlights across reload/revisit, and a
@@ -254,10 +264,11 @@ collection.
 
 ## Submission notes
 
-- Packages: `dist/huemark-0.1.0-chrome-edge.zip` (Chrome Web Store, Edge
-  Add-ons) and `dist/huemark-0.1.0-firefox.zip` (Firefox AMO) — identical
-  contents, same manifest (includes `browser_specific_settings.gecko` for
-  Firefox), built from `scripts/package.ps1`.
+- Packages: `dist/huemark-0.2.0-chrome-edge.zip` (Chrome Web Store, Edge
+  Add-ons) and `dist/huemark-0.2.0-firefox.zip` (Firefox AMO), built from
+  `scripts/package.ps1`. Same sources and `manifest.json`; the Chrome/Edge
+  zip omits `background.scripts`, and both keep
+  `browser_specific_settings.gecko` for Firefox.
 - Firefox AMO may request the extension source if it flags anything for
   manual review; no build step is used (plain JS, no bundler/minifier), so
   the submitted zip *is* the source.

@@ -1,42 +1,45 @@
-# HueMark release notes (draft, after v0.1.1)
+# HueMark 0.2.0 release notes (draft)
 
-Built from project notes on 2026-11-01; not diffed against the v0.1.1 tag, so verify before publishing.
+Built from `git log v0.1.1..HEAD` (9 commits) on 2026-11-03. Not published.
 
-## Visible changes
-1. **Saved term lists.** Up to 10 lists in the popup, with inline save, 2-click delete and a dirty-state dot. The cap is a UX limit, not a performance one.
-2. **Copy matches.** A Format menu with Matches, Citation, Legal, Research and Resume.
-   - Click once to collect, click again to copy. Output pastes as rich text and as plain text.
-   - Modes: Snippet, Sentence, Paragraph; clubbed ("a + b") headers by default.
-   - Citation styles: APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA, Plain.
-   - Scroll-to-text links on web quotes; page numbers on PDFs.
-   - Citation details are read from scholarly meta tags (citation_*, Dublin Core, PRISM), then OpenGraph, then JSON-LD: title, authors, date, journal, volume, issue, pages, publisher, DOI. Journal articles with a DOI cite the DOI link; other pages get a web-page reference with URL and access date.
-   - Each quote gets an in-text citation in the chosen style; legal styles put the case citation in the reference instead. Missing fields are omitted, never invented.
-   - Research format adds author, year, source and section per passage; Resume lists which terms were found, with counts and location.
-3. **Legal.** Its own Format with a 22-option country menu (see below).
-4. **Matching.** Wildcard/regex terms; accent folding always on (no toggle; ß, ł, đ, œ and others); CSS Highlight engine fallback that switches in automatically.
-5. **Page coverage.** Highlights inside iframes and shadow DOM; a scroll-bar tick marker per match.
-6. **Right-click add.** Add a selected word as a term from the context menu.
-7. **PDF.** "Open PDF viewer" button, an open bar inside the viewer, PDF.js updated to 6.4.299.
-8. **Popup help text** in all 13 locales.
-9. **Per-tab on/off (behaviour change).** HueMark now starts OFF in every tab, including after an update, and you switch it on per tab (or per PDF) with the popup switch or the bar's ⏻ button. There is no global setting any more. Switching off clears that tab's highlights and keeps your terms; ✕ on the bar only hides the bar. Right-click "add" also turns the tab on. Only a list of tab numbers is kept, in session memory: no URLs, site names or history are stored, and it clears when a tab or the browser closes. Export on an off tab says "Off on this tab". Strings are localized in all 13 locales.
-   - Existing users: after updating, highlights will not appear until the tab is switched on; the popup shows "HueMark is off on this tab. Turn it on to highlight." Say so in the store description and the release notes.
+**Upgrading from 0.1.1:** HueMark now starts OFF in every tab. After updating, turn it on for each tab you want (popup switch, or the power button on the bar). The old global Enabled checkbox is gone. The extension also asks for one new permission, `contextMenus` (right-click menu), so the browser may ask you to approve the update.
 
-## Legal
-- **Verified on real pages:** France, India, Portugal, UK, Germany, Switzerland, Austria, Spain, Colombia, Korea, Japan, Russia, Canada (McGill), Italy, China (guiding cases only), US Bluebook (Library of Congress PDF of Brown v. Board, Cornell LII page).
-- **Built, fixture-tested only:** EU, Australia (AGLC), Mexico, Brazil (need single-judgment URLs), Argentina (CSJN), Arabic courts, ordinary China judgment pages.
-- **Not built:** see section D of `tests/live/TASKLIST.md`. These fall back to the generic web-page citation.
-- **Caveats:** formats are common practice, not checked against official style guides. Non-English translations are unreviewed by native speakers. Anything not recognised as a case falls back to a web citation.
+## Added
+- **Copy matches.** The popup button collects every match on the page or PDF, then copies it as rich text and plain text. Click once to collect, and again to copy when it reads "Export ready". Navigation, sidebars, reference lists and label-only lines are left out.
+- **Format presets:** Matches (every hit), Citation, Legal, Research, Resume.
+  - Citation adds a reference and an in-text citation for each quote in APA, MLA, Chicago, Harvard, IEEE, Vancouver, AMA or Plain style. Citation details come from scholarly meta tags, OpenGraph and JSON-LD. Missing fields are left out, not invented.
+  - Legal formats cite court decisions in 22 country and court styles (for example US Bluebook, UK OSCOLA, Canada McGill, Australia AGLC, EU, Brazil, Japan, Korea, China, Russia, Argentina, Mexico, Colombia).
+  - Research adds author, year, source and section for each passage. Resume lists which terms were found, with counts and locations.
+- **Passage modes:** Snippet, Sentence or Paragraph. Passages with several terms are grouped under one header such as "cat + dog" (default). Untick this to repeat the passage under each term.
+- **Saved term lists.** Save the current terms under a name and reuse them later. Up to 10 lists. Delete needs two clicks.
+- **Wildcards and regex.** `*` and `?` match any run of letters or digits. `/pattern/` is a regular expression. A broken regex is flagged and skipped.
+- **Accent folding** is always on, so "cafe" also finds "café" and "strasse" finds "straße". Covers ß, ł, đ, œ and other letters.
+- **CSS Highlight engine.** When a page removes HueMark's `<mark>` elements, highlighting switches automatically to the browser's CSS Custom Highlight API.
+- **Iframes and shadow DOM.** Match counts, navigation and highlights now cover embedded frames and shadow roots, not just the top page.
+- **Scroll-bar ticks.** A small marker on the scroll bar for each match.
+- **Right-click "Add selection to HueMark"** adds the selected text as a term and turns highlighting on for that tab.
+- **Per-tab on/off.** Switch HueMark on or off for the current tab (or PDF) from the popup or the bar. Switching off clears that tab's highlights and keeps your terms.
+- **arXiv PDFs.** Links of the form arxiv.org/pdf/<id> open in HueMark's PDF viewer.
+- **Open PDF viewer** button in the popup, with an open bar inside the viewer.
+- **Help text** for presets, saved lists and PDFs, in all 13 interface languages.
+- **Test suites** in `tests/live/` (Chromium, Edge) and `tests/firefox/` (Firefox). Developer use only; not in the store packages.
 
-## Known gaps to disclose
-- Sub- and superscripts get glued together in Wikipedia equations ("CO 2carbondioxide").
-- Hidden-tab PDF rendering is unverified.
+## Changed
+- **Off by default per tab.** Highlights are no longer on everywhere by default. Each tab starts off and stays off until switched on. Only a list of tab numbers is kept, in session memory. No URLs, site names or history are stored, and the list clears when a tab or the browser closes.
+- **Bar close button** is now "Hide bar". It hides the bar only; highlights stay on.
+- **PDF.js** updated to 6.4.299 (viewer translations added for the 13 languages HueMark ships).
+- **Permissions:** `contextMenus` added (for the right-click item). Content scripts now also run in `about:blank` frames.
+- **Docs:** README, store listing (13 languages) and privacy policy updated for the above.
+
+## Fixed
+- PDF redirect rules are re-registered whenever the background worker starts. Previously PDFs could open in the browser's own viewer until the browser restarted.
+
+## Removed
+- **Global Enabled checkbox.** Replaced by the per-tab switch.
+- **"Open local PDF..." button** and its help text. Use "Open PDF viewer" instead. On Chrome and Edge, local PDFs still open automatically if "Allow access to file URLs" is enabled for HueMark.
+
+## Known issues
+- Sub- and superscripts can run together in some exported equations (for example "CO 2carbondioxide").
+- Hidden-tab PDF export has not been verified.
+- Legal citation formats follow common practice. They have not been checked against official style guides, and non-English translations have not been reviewed by native speakers. Anything not recognised as a case falls back to a web-page citation.
 - Safari is not supported.
-- CSS engine and the newest legal detectors have had no code review.
-
-## Release checklist
-- [ ] Update `store-listing.md` and `store-listing-i18n.md` (13 locales) for the above.
-- [ ] Re-check privacy/permissions text (export uses the clipboard and background tab reads).
-- [ ] Update README.
-- [ ] Version bump, rebuild Chrome/Edge/AMO packages, new tag, GitHub Release.
-- [ ] Commit and push (5 earlier local commits are unpushed; most of this work is uncommitted).
-- [ ] Manual real-browser checks in `tests/live/TASKLIST.md` (including the arXiv `/pdf/<id>` redirect).
