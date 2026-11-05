@@ -60,6 +60,7 @@ const count = (s, sub) => s.split(sub).length - 1;
     // ---- popup controls
     const popup = await ext.ctx.newPage();
     await popup.goto(ext.popupUrl);
+    await popup.locator("#advancedSection > summary").click(); // export controls live in the Advanced accordion
     await t.check("defaults: mode=snippet, club row hidden, club checked", async () =>
       (await popup.locator("#exportMode").inputValue()) === "snippet" &&
       !(await popup.locator("#exportClubRow").isVisible()) &&

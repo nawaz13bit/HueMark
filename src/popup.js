@@ -683,6 +683,13 @@ chrome.storage.local.get(EXPORT_PREFS_KEY).then((r) => {
   if ([...exportLegalStyle.options].some((o) => o.value === prefs.legalStyle)) exportLegalStyle.value = prefs.legalStyle;
   syncExportPrefsUi();
 });
+const advancedSection = document.getElementById("advancedSection");
+chrome.storage.local.get("huemark_advanced_open").then((r) => {
+  if (r.huemark_advanced_open === true) advancedSection.open = true;
+}).catch(() => {});
+advancedSection.addEventListener("toggle", () => {
+  chrome.storage.local.set({ huemark_advanced_open: advancedSection.open });
+});
 exportPreset.addEventListener("change", () => { syncExportPrefsUi(); saveExportPrefs(); });
 exportStyle.addEventListener("change", saveExportPrefs);
 exportLegalStyle.addEventListener("change", saveExportPrefs);
