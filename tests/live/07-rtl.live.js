@@ -9,6 +9,7 @@ const { createRunner, launch } = require("./lib");
   try {
     const popup = await ext.ctx.newPage();
     await popup.goto(ext.popupUrl);
+    await popup.locator("#advancedSection > summary").click(); // #exportBtn lives in the Advanced accordion
     const info = await popup.evaluate(() => ({
       dir: document.documentElement.dir,
       ui: chrome.i18n.getUILanguage(),

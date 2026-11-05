@@ -10,8 +10,8 @@ HueMark does not collect, transmit, or sell any user data.
   lists, each with its own terms and colors), and your settings (whole-word
   matching, colorblind palette, toolbar position, etc.) are saved using the
   browser's built-in `chrome.storage.local` API.
-- Your Copy matches preferences (format, mode, citation style) are saved the
-  same way.
+- Your Copy matches preferences (format, mode, citation style) and whether the
+  popup's "Advanced" section was left open are saved the same way.
 - When Copy matches has collected a result that you have not copied yet, that
   result (the matched text with the text around it) is held in the browser's
   session storage. Session storage is cleared when the browser closes. If the

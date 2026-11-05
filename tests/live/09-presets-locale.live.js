@@ -177,6 +177,7 @@ const ACCENT = `<!doctype html><html><head><meta charset="utf-8"><title>Café É
     // ---- popup preset UI
     const popup = await ext.ctx.newPage();
     await popup.goto(ext.popupUrl);
+    await popup.locator("#advancedSection > summary").click(); // export controls live in the Advanced accordion
     await t.check("Format select offers 5 presets; Style select offers 8 styles; Legal style select offers 22", async () =>
       (await popup.locator("#exportPreset option").count()) === 5 && (await popup.locator("#exportStyle option").count()) === 8
       && (await popup.locator("#exportLegalStyle option").count()) === 22);

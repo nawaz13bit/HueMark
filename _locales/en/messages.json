@@ -189,6 +189,10 @@
   "exportClubInfoLabel": { "message": "Why club them?" },
   "exportClubInfo": { "message": "A paragraph or sentence that contains several of your terms is listed once, under a header such as “cat + dog”, instead of being repeated under each term. Nothing is duplicated, the totals stay honest, and the “cat + dog” section shows where your terms appear together. Untick this to repeat the passage under every term it contains." },
   "exportMdPassages": { "message": "Passages" },
+  "popupAdvanced": {
+    "message": "Advanced: export & citations",
+    "description": "Summary of the collapsible section holding export and citation options."
+  },
   "popupExportHelpTitle": {
     "message": "Export help",
     "description": "Summary/title for the collapsible export help section."

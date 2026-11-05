@@ -23,7 +23,9 @@ at once, each in its own color, across:
   as rich text and plain text. Formats: Matches, Citation, Legal, Research and
   Resume. Modes: Snippet, Sentence or Paragraph. Citation styles: APA, MLA,
   Chicago, Harvard, IEEE, Vancouver, AMA and Plain. Web quotes get
-  scroll-to-text links; PDF quotes get page numbers.
+  scroll-to-text links; PDF quotes get page numbers. The export options and
+  the button live in the popup's collapsed "Advanced: export & citations"
+  section, which stays open or closed as you left it.
 - **Legal citations** — a Legal format with 22 jurisdiction options. See
   [Legal citations](#legal-citations).
 - **Keyboard navigation** — jump between matches and cycle terms without

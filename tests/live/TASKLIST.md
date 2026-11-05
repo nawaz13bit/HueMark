@@ -21,7 +21,7 @@ Live = real Chromium + the real unpacked extension, driven by Playwright. Last r
 | 8/8 | `05-css-engine` | forced engine switch (page replaces marks), `CSS.highlights` ranges, no DOM wrappers, ticks host, `huemark-current` after jump, export in CSS mode, clear removes ranges |
 | 20/20 | `06-export-modes` | popup export controls (mode select, club row visibility, "!" + aria-expanded, saved/restored prefs), sentence/paragraph/snippet output, club vs repeat, no "(0)" section, PDF sentence/paragraph via real collect() |
 
-| 3/3 | `07-rtl` | `locale: "ar"` popup gets dir=rtl, Arabic strings |
+| 3/3 | `07-rtl` (popup export controls now sit in the collapsed `#advancedSection`; 06/07/09 click its summary first) | `locale: "ar"` popup gets dir=rtl, Arabic strings |
 | 18/18 | `08-power-switch` | PER-TAB on/off (2026-11-02): new tab starts off, popup switch (active tab) on/off, second tab unaffected, bar power button toggles only its tab, bar ✕ only hides, off-tab export acks {started:false, off:true}, tab id dropped from `huemark_tabs_on` on close, new tab does not inherit, no 'http'/host strings in storage.session/local |
 | 37/37 | `09-presets-locale` | 13 locales x 89 keys, PDF.js locale folders, 5 Formats (Matches/Citation/Legal/Research/Resume; Legal has its own 21-option style dropdown, Citation 8), output from a real collect(), Format/Style popup controls (Style hidden via computed display for non-Citation), localized Format options (de/fr/es), real-world quirks (labels, footnote markers, PubMed authors), accented authors/titles (Müller, Dvořák, Café) |
 

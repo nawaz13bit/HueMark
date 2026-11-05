@@ -152,8 +152,9 @@ How to test:
    active term; Alt+Shift+B opens a floating bar. Chrome doesn't always
    auto-bind these defaults for dev-mode extensions with several commands;
    if a shortcut doesn't fire, set it at `chrome://extensions/shortcuts`.
-6. Copy matches (popup): click once to collect, again to copy. The popup
-   can be closed while collecting.
+6. Copy matches (popup): expand "Advanced: export & citations", click Copy
+   matches once to collect, again to copy. The popup can be closed while
+   collecting.
 7. Right-click a selected word and choose "Add selection to HueMark".
 
 Why broad host permissions (`<all_urls>`): users choose their own terms and
@@ -217,7 +218,8 @@ https://github.com/nawaz13bit/HueMark
 
 - `01-webpage-highlights-popup.png` — Wikipedia article with 6 terms
   highlighted in distinct colors, popup panel open showing the term/color
-  list.
+  list. (Predates the collapsed "Advanced" section: retake the popup panel
+  before the next store update so it matches the current layout.)
 - `02-webpage-highlights-nav.png` — same page, keyboard-nav term picker
   open showing per-term match counts and color dots.
 - `03-pdf-highlights.png` — a real IRS Form 1040 PDF opened in the bundled

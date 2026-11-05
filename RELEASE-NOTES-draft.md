@@ -26,6 +26,7 @@ Built from `git log v0.1.1..HEAD` (9 commits) on 2026-11-03. Not published.
 
 ## Changed
 - **Off by default per tab.** Highlights are no longer on everywhere by default. Each tab starts off and stays off until switched on. Only a list of tab numbers is kept, in session memory. No URLs, site names or history are stored, and the list clears when a tab or the browser closes.
+- **Simpler popup.** The export and citation options (Format, Style, Extract, Copy matches) now sit in a collapsed "Advanced: export & citations" section. Terms, saved lists, whole-word, colorblind palette, Open PDF viewer and Clear all stay on the main screen. The section remembers whether you left it open.
 - **Bar close button** is now "Hide bar". It hides the bar only; highlights stay on.
 - **PDF.js** updated to 6.4.299 (viewer translations added for the 13 languages HueMark ships).
 - **Permissions:** `contextMenus` added (for the right-click item). Content scripts now also run in `about:blank` frames.

@@ -363,6 +363,22 @@ input.switch:focus-visible {
   margin-top: 6px;
 }
 
+.advanced {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.advanced > summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.advanced > summary:hover {
+  color: var(--accent);
+}
+
 .export-opts {
   margin-top: 10px;
   font-size: 12px;
