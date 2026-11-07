@@ -43,11 +43,11 @@ at once, each in its own color, across:
 
 On a web page:
 
-![HueMark highlighting terms on a web page](screenshots/02-demo-web.gif)
+![HueMark highlighting terms on a web page](docs/media/demo-web.gif)
 
 In a PDF:
 
-![HueMark highlighting terms in a PDF](screenshots/03-demo-pdf.gif)
+![HueMark highlighting terms in a PDF](docs/media/demo-pdf.gif)
 
 ## Install
 
@@ -167,14 +167,14 @@ own in-popup file picker (used on Chrome/Edge) doesn't work there.
 ```
 HueMark/
   manifest.json         MV3 manifest
-  src/
-    background.js         installs default storage state
-    highlighter.js         DOM-walking highlight engine (pure, reusable)
-    content.js              wires highlighter.js to storage + MutationObserver
-    popup.html/css/js       term list + color picker UI
-    pdf-picker.js            wires highlighter.js into the bundled PDF.js viewer
-  vendor/pdfjs/            bundled PDF.js viewer (see vendor/pdfjs/LICENSE)
-  icons/                    toolbar icons
+  src/                    background, highlighter, content script, popup,
+                          exporter, citation and PDF viewer wiring
+  vendor/pdfjs/           bundled PDF.js viewer (see vendor/pdfjs/LICENSE)
+  _locales/               13 translations
+  icons/                  toolbar icons
+  scripts/package.ps1     builds the Chrome/Edge and Firefox zips
+  tests/live/             real-browser test suites
+  docs/media/             README demo GIFs
 ```
 
 ## Try it locally
