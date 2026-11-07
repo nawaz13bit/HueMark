@@ -188,7 +188,6 @@ HueMark/
 
 ## Next implementation steps
 
-- [ ] Per-site enable/disable (currently global on/off only).
 - [x] Per-term match counts (`current/total`) with next/prev navigation.
 - [ ] Overall match total across all terms.
 - [x] Saved term lists: save the current terms under a name and load them back from a dropdown in the popup.
@@ -213,11 +212,6 @@ HueMark/
       in `<mark>` can conflict with React/Vue's own re-rendering of that
       same DOM (reverted highlights, or errors when the framework tries to
       remove a text node HueMark has replaced).
-
-### Not planned
-
-- AI summaries or accounts (no-account is part of the pitch).
-- Paywalled PDF or OCR (free PDF support is a differentiator).
 
 ## License
 
