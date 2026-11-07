@@ -177,15 +177,6 @@ HueMark/
   docs/media/             README demo GIFs
 ```
 
-## Try it locally
-
-1. Open `chrome://extensions`.
-2. Enable **Developer mode** (top right).
-3. Click **Load unpacked**, select the `HueMark` folder.
-4. Click the HueMark icon, add a couple of words with colors, and open any
-   webpage — matches highlight immediately and stay highlighted as the page
-   updates or is reloaded.
-
 ## Next implementation steps
 
 - [x] Per-term match counts (`current/total`) with next/prev navigation.
