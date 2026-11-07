@@ -1,6 +1,6 @@
 <#
   Packages HueMark into two store-ready zips:
-    dist\huemark-<version>-chrome-edge.zip  (manifest without background.scripts)
+    dist\huemark-<version>-chrome-edge.zip  (manifest without background.scripts / browser_specific_settings)
     dist\huemark-<version>-firefox.zip      (manifest as-is, scripts + service_worker)
   Edge/Chrome validators reject background.scripts under MV3, while Firefox
   has no background service workers and only reads background.scripts, so the
@@ -42,9 +42,14 @@ function New-HueMarkZip {
         $text = Get-Content $manifestPath -Raw
         # Matches only the quoted "scripts" key, not "content_scripts".
         $text = $text -replace ',\s*"scripts"\s*:\s*\[[^\]]*\]', ''
+        # Chrome/Edge flag the Firefox-only browser_specific_settings key as unrecognized.
+        $text = $text -replace '(?s)"browser_specific_settings"\s*:\s*\{.*?\}\s*\}\s*,\s*', ''
         $parsed = $text | ConvertFrom-Json
         if ($parsed.background.PSObject.Properties.Name -contains "scripts") {
             throw "Failed to strip background.scripts from the manifest"
+        }
+        if ($parsed.PSObject.Properties.Name -contains "browser_specific_settings") {
+            throw "Failed to strip browser_specific_settings from the manifest"
         }
         [System.IO.File]::WriteAllText($manifestPath, $text, (New-Object System.Text.UTF8Encoding($false)))
     }
