@@ -87,6 +87,7 @@ async function launch(opts = {}) {
     channel: edge ? "msedge" : "chromium",
     headless: edge ? false : headless,
     ...(locale ? { locale } : {}),
+    ...(opts.deviceScaleFactor ? { deviceScaleFactor: opts.deviceScaleFactor } : {}),
     args: [
       `--disable-extensions-except=${EXT_PATH}`, `--load-extension=${EXT_PATH}`,
       ...(edge ? ["--disable-features=DisableLoadExtensionCommandLineSwitch"] : []),

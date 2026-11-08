@@ -1406,7 +1406,10 @@
       // PubMed puts the NLM abbreviation ("N Engl J Med") in citation_publisher.
       journalAbbr: clean(raw.journalAbbrev || (pubmed && raw.journal && /^[\p{L}][\p{L}.\s&-]{1,40}$/u.test(String(raw.publisher || "").trim()) ? raw.publisher : "") || "").trim(),
       volume: raw.volume || "", issue: raw.issue || "", pages,
-      doi: doiMatch ? mdUrl(doiMatch[0]) : "", url: mdUrl(url), isPdf: !!data.isPdf, now,
+      doi: doiMatch ? mdUrl(doiMatch[0]) : "", url: mdUrl(url),
+      // Academic research database (APA: no URL for DOI-less articles from these).
+      database: pubmed || /(?:^|\.)(?:ncbi\.nlm\.nih\.gov|europepmc\.org|jstor\.org|proquest\.com|ebscohost\.com|psycnet\.apa\.org)$/i.test(host),
+      isPdf: !!data.isPdf, now,
       legal: detectCase(title, String(raw.head || "")),
       legalUk: detectUkCase(title, String(raw.head || "")),
       legalCa: detectCaCase(title, String(raw.head || "")),
@@ -1450,6 +1453,8 @@
       if (!sn.length) return null;
       if (sn.length === 1) return sn[0];
       if (s === "chicago") return sn.length >= 4 ? `${sn[0]} et al.` : listAnd(sn, ", ", "and");
+      // Cite Them Right Harvard (York St John guide): up to three authors are named, four or more are "et al.".
+      if (s === "harvard" && sn.length === 3) return `${sn[0]}, ${sn[1]} and ${sn[2]}`;
       return sn.length === 2 ? `${sn[0]} ${s === "apa" ? "&" : "and"} ${sn[1]}` : `${sn[0]} et al.`;
     };
     const w = names(style);
@@ -1476,7 +1481,13 @@
       const author = names.length > 20 ? [...names.slice(0, 19), `… ${names[names.length - 1]}`].join(", ") : names.length > 1 ? `${names.slice(0, -1).join(", ")}, & ${names[names.length - 1]}` : names[0] || "";
       const dt = !d ? "n.d." : j || !d.m ? String(d.y) : `${d.y}, ${MONTHS[d.m - 1]}${d.d ? " " + d.d : ""}`;
       const lead = author ? `${e(dot(author))} (${dt}). ` : "";
-      if (j) return `${lead || ""}${e(ends(t))} *${e(m.journal)}*${m.volume ? `, *${e(m.volume)}*` : ""}${m.issue ? `(${e(m.issue)})` : ""}${m.pages ? `, ${e(m.pages)}` : ""}. ${link}`;
+      if (j) {
+        // APA 7: an article number (e0193972, 104678) is written "Article N" in place of a page range.
+        const pg = m.pages ? (/^(?:[A-Za-z]+\d+|\d{5,})$/.test(m.pages) ? `Article ${m.pages}` : m.pages) : "";
+        // APA 7: a DOI-less article from an academic database ends after the pages, same as print.
+        const tail = !m.doi && m.database ? "" : ` ${link}`;
+        return `${lead || ""}${e(ends(t))} *${e(m.journal)}*${m.volume ? `, *${e(m.volume)}*` : ""}${m.issue ? `(${e(m.issue)})` : ""}${pg ? `, ${e(pg)}` : ""}.${tail}`;
+      }
       return `${lead || `*${e(dot(t))}* (${dt}). `}${author ? `*${e(dot(t))}* ` : ""}${site ? e(dot(site)) + " " : ""}${link}`.replace(/\s+/g, " ");
     }
     if (style === "mla") {
@@ -1497,26 +1508,36 @@
         ? `*${e(m.journal)}*${m.volume ? ` ${e(m.volume)}` : ""}${m.issue ? ` (${e(m.issue)})` : ""}${m.pages ? `: ${e(m.pages)}` : ""}.`
         : `${site ? e(dot(site)) : ""}${full}`;
       // No author: the title takes the author's place, ahead of the year.
-      return (names ? `${e(dot(names))} ${y}. ${ttl} ${body} ${link}.` : `${ttl} ${y}. ${body} ${link}.`).replace(/\s+/g, " ");
+      // CMOS: an access date is given only when the page shows no publication date ("n.d.").
+      const accessed = !d && !j ? ` Accessed ${MONTHS[acc.getMonth()]} ${acc.getDate()}, ${acc.getFullYear()}.` : "";
+      return (names ? `${e(dot(names))} ${y}. ${ttl} ${body}${accessed} ${link}.` : `${ttl} ${y}. ${body}${accessed} ${link}.`).replace(/\s+/g, " ");
     }
     if (style === "harvard") {
       const one = (a) => (a.org || !a.given ? a.family : `${a.family}, ${initials(a.given, true, "")}`);
-      const names = A.length >= 4 ? `${one(A[0])} et al.` : listAnd(A.map(one), ", ", "and");
+      // A web page with no personal author is credited to the site/organisation (Cite Them Right: "Organisation (Year) Title.").
+      const credit = !A.length && !j && site ? site : "";
+      const names = credit || (A.length > 10 ? `${one(A[0])} et al.` : A.length >= 3 ? `${A.slice(0, -1).map(one).join(", ")} and ${one(A[A.length - 1])}` : listAnd(A.map(one), ", ", "and"));
+      // Cite Them Right (Newcastle sheet): the reference list names every author; "et al." only above 10.
       const y = d ? String(d.y) : "n.d.";
-      const dm = d && d.m && d.d && !j ? `, ${d.d} ${MONTHS[d.m - 1]}` : "";
       const acc2 = `${acc.getDate()} ${MONTHS[acc.getMonth()]} ${acc.getFullYear()}`;
+      // Cite Them Right: an article number is "article N" in place of pages; online = "Available at: DOI or URL (Accessed: date)".
+      const pg = !m.pages ? "" : /^(?:[A-Za-z]+\d+|\d{5,})$/.test(m.pages) ? `, article ${e(m.pages)}` : `, pp. ${e(m.pages)}`;
       const body = j
-        ? `‘${e(t)}’, *${e(m.journal)}*${m.volume ? `, ${e(m.volume)}` : ""}${m.issue ? `(${e(m.issue)})` : ""}${m.pages ? `, pp. ${e(m.pages)}` : ""}.${m.doi ? ` doi:${e(m.doi)}.` : ""}`
-        : `‘${e(t)}’${site ? `, *${e(site)}*` : ""}${dm}. Available at: <${m.url}> (Accessed: ${acc2}).`;
+        ? `‘${e(t)}’, *${e(m.journal)}*${m.volume ? `, ${e(m.volume)}` : ""}${m.issue ? `(${e(m.issue)})` : ""}${pg}. ${m.doi ? `Available at: <https://doi.org/${m.doi}>` : `Available at: <${m.url}> (Accessed: ${acc2})`}.`
+        : `*${e(t)}*. Available at: <${m.url}> (Accessed: ${acc2}).`;
       return `${names ? e(names) + " " : ""}(${y}) ${body}`.replace(/\s+/g, " ");
     }
     if (style === "ieee") {
       const one = (a) => (a.org || !a.given ? a.family : `${initials(a.given, true, " ")} ${a.family}`);
       const names = A.length > 6 ? `${one(A[0])} et al.` : listAnd(A.map(one), ", ", "and");
       const date = !d ? "" : d.m ? `${M_IEEE[d.m - 1]} ${d.d ? d.d + ", " : ""}${d.y}` : String(d.y);
+      // IEEE guide: an article ID is "Art. no. N" after the date, not a page range.
+      const artNo = m.pages && /^(?:[A-Za-z]+\d+|\d{5,})$/.test(m.pages);
+      // IEEE guide (Websites): "Accessed: Mon. D, YYYY. [Online]. Available: URL".
+      const accessed = `Accessed: ${M_IEEE[acc.getMonth()]} ${acc.getDate()}, ${acc.getFullYear()}.`;
       const body = j
-        ? `“${e(t)},” *${e(m.journal)}*${m.volume ? `, vol. ${e(m.volume)}` : ""}${m.issue ? `, no. ${e(m.issue)}` : ""}${m.pages ? `, pp. ${e(m.pages)}` : ""}${date ? `, ${e(date)}` : ""}${m.doi ? `, doi: ${e(m.doi)}` : ""}.`
-        : `“${e(t)},”${site ? ` *${e(site)}*,` : ""}${date ? ` ${e(date)}.` : ""} [Online]. Available: <${m.url}>`;
+        ? `“${e(t)},” *${e(m.journal)}*${m.volume ? `, vol. ${e(m.volume)}` : ""}${m.issue ? `, no. ${e(m.issue)}` : ""}${m.pages && !artNo ? `, pp. ${e(m.pages)}` : ""}${date ? `, ${e(date)}` : ""}${artNo ? `, Art. no. ${e(m.pages)}` : ""}${m.doi ? `, doi: ${e(m.doi)}` : ""}.`
+        : `“${e(t)},”${site ? ` *${e(site)}*,` : ""}${date ? ` ${e(date)}.` : ""} ${accessed} [Online]. Available: <${m.url}>`;
       return `\\[1\\] ${names ? e(names) + ", " : ""}${body}`.replace(/\s+/g, " ");
     }
     if (style === "vancouver" || style === "ama") {

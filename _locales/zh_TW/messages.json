@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ 支持這個擴充功能" },
   "popupDonateDismiss": { "message": "暫時不要，下次再顯示" },
   "popupShortcutsMissing": { "message": "尚未設定鍵盤快速鍵。" },
+  "popupShortcutsIntro": { "message": "提示：可用鍵盤快速鍵在符合項目之間跳轉，也可自行更改。" },
   "popupShortcutsSet": { "message": "設定快速鍵" },
   "popupShortcutsDismiss": { "message": "不再顯示" },
   "termAddAnother": { "message": "新增其他詞語" },

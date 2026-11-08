@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ Diese Erweiterung unterstützen" },
   "popupDonateDismiss": { "message": "Nicht jetzt, bis zum nächsten Mal ausblenden" },
   "popupShortcutsMissing": { "message": "Tastenkürzel sind noch nicht eingerichtet." },
+  "popupShortcutsIntro": { "message": "Tipp: Mit Tastenkürzeln springst du zwischen Treffern. Du kannst sie ändern." },
   "popupShortcutsSet": { "message": "Tastenkürzel festlegen" },
   "popupShortcutsDismiss": { "message": "Nicht mehr anzeigen" },
   "termAddAnother": { "message": "Weiteres Wort hinzufügen" },

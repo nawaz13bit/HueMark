@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path -Parent $PSScriptRoot
-$outPath = Join-Path $root "screenshots\marquee-tile-1400x560.png"
+$outPath = Join-Path $root "media\marquee-tile-1400x560.png"
 
 $W = 1400
 $H = 560

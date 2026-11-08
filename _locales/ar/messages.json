@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ ادعم هذه الإضافة" },
   "popupDonateDismiss": { "message": "ليس الآن، إخفاء حتى المرة القادمة" },
   "popupShortcutsMissing": { "message": "لم يتم إعداد اختصارات لوحة المفاتيح بعد." },
+  "popupShortcutsIntro": { "message": "نصيحة: تنقلك اختصارات لوحة المفاتيح بين النتائج. يمكنك تغييرها." },
   "popupShortcutsSet": { "message": "تعيين الاختصارات" },
   "popupShortcutsDismiss": { "message": "عدم عرض هذا مرة أخرى" },
   "termAddAnother": { "message": "إضافة كلمة أخرى" },

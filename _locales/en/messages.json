@@ -103,6 +103,10 @@
     "message": "Keyboard shortcuts aren't set up yet.",
     "description": "Popup banner shown when one or more HueMark keyboard shortcuts have no key assigned."
   },
+  "popupShortcutsIntro": {
+    "message": "Tip: keyboard shortcuts jump between matches. You can change them.",
+    "description": "Popup banner shown once on first run when the HueMark keyboard shortcuts are assigned, pointing at the browser's shortcuts page."
+  },
   "popupShortcutsSet": {
     "message": "Set shortcuts",
     "description": "Button in the popup banner that opens the browser's extension shortcuts page."

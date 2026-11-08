@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ Sostieni questa estensione" },
   "popupDonateDismiss": { "message": "Non ora, nascondi fino alla prossima volta" },
   "popupShortcutsMissing": { "message": "Le scorciatoie da tastiera non sono ancora configurate." },
+  "popupShortcutsIntro": { "message": "Suggerimento: le scorciatoie da tastiera passano da un risultato all'altro. Puoi modificarle." },
   "popupShortcutsSet": { "message": "Imposta scorciatoie" },
   "popupShortcutsDismiss": { "message": "Non mostrare più" },
   "termAddAnother": { "message": "Aggiungi un'altra parola" },

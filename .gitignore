@@ -6,7 +6,12 @@ node_modules/
 tests/live/shots/
 .claude/scheduled_tasks.lock
 
-# demo video + screenshots
-demo-video/
-screenshots/
+# screenshots, GIFs and demo video
+media/
+
+# local popup mockups
+preview/
 store-listing*.md
+
+# fetched citation-guide texts (third-party copyrighted, local reference only)
+docs/citation-sources/

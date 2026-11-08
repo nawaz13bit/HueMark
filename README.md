@@ -124,6 +124,15 @@ PDF you collected from:
 - Missing details are left out rather than invented. Check the output against
   your style guide before submitting.
 
+Verification status of the general styles (checked 2026-11-08):
+
+- **Checked against the official guide:** APA 7, Vancouver (NLM) and IEEE.
+- **Checked against a university guide or other secondary source only:** MLA 9.
+- **Checked against public university guides or real published articles, not
+  the official manual:** Chicago (author-date), Harvard (Cite Them Right) and
+  AMA. Harvard has no single standard, so it follows Cite Them Right.
+- Plain is a simple format with no style guide.
+
 ## Legal citations
 
 The **Legal** format in Copy matches formats a case citation in one of 22
@@ -131,24 +140,34 @@ options, such as Bluebook (US), OSCOLA (UK), McGill (Canada) and AGLC
 (Australia). Anything not recognised as a case falls back to the generic
 web-page citation.
 
-Status as of 2026-11-01 (from `tests/live/TASKLIST.md`, sections C and D):
+Status as of 2026-11-08 (from `tests/live/TASKLIST.md`, sections C, C2 and D):
 
-- **Checked on real pages:** France, India, Portugal, UK, Germany,
+- **Checked against the official guide:** OSCOLA (UK). AGLC4 (Australia) rules
+  were taken from a library copy of AGLC4, but not checked on a real page.
+- **Checked against a public guide only:** US Bluebook (case-name word table vs
+  Cornell LII's Bluebook-based guide; U.S. Supreme Court opinions only). The
+  official Bluebook is paywalled and was not used.
+- **Checked on real pages (no guide check):** France, India, Portugal, UK, Germany,
   Switzerland, Austria, Spain, Colombia, Korea, Japan, Russia, Canada (McGill),
   Italy, US (Bluebook), and China (guiding cases only).
 - **Built and tested on fixtures only, no real page checked yet:** EU,
   Australia (AGLC), Mexico, Brazil, Argentina, Arabic courts, and ordinary
   China judgment pages.
-- **Not built:** other jurisdictions, for example Ireland, the Netherlands and
-  Chile. These fall back to the generic web-page citation.
+- **Not built:** every jurisdiction outside the 22 options, for example Ireland,
+  the Netherlands, Chile, South Africa, New Zealand, Singapore, Israel, Turkey,
+  Poland, the Nordic countries, Greece and Peru. These fall back to the generic
+  web-page citation.
 
 Caveats:
 
-- The formats are common practice. They have not been checked against official
-  style guides.
+- Apart from OSCOLA and AGLC4 (rules from a library copy), the legal formats
+  follow common practice and have not been checked against their official style
+  guides (the McGill guide included). Bluebook is covered above.
+- The extra Bluebook case-name omission rules (for example dropping "State of"
+  or "City of") are not applied.
 - Non-English translations are not reviewed by native speakers.
 
-On Firefox, local PDFs must be opened via the popup's "Open local PDF..."
+On Firefox, local PDFs must be opened via the popup's "Open PDF viewer"
 button, which opens the bundled PDF.js viewer tab — use the viewer's own
 "Open File" button from there to pick your file. Firefox tears down the
 extension popup the instant a native file picker opens, so the popup's

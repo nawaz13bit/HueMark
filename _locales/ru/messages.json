@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ Поддержать это расширение" },
   "popupDonateDismiss": { "message": "Не сейчас, скрыть до следующего раза" },
   "popupShortcutsMissing": { "message": "Сочетания клавиш ещё не настроены." },
+  "popupShortcutsIntro": { "message": "Совет: сочетания клавиш переходят между совпадениями. Их можно изменить." },
   "popupShortcutsSet": { "message": "Настроить сочетания" },
   "popupShortcutsDismiss": { "message": "Больше не показывать" },
   "termAddAnother": { "message": "Добавить ещё слово" },

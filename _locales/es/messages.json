@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ Apoya esta extensión" },
   "popupDonateDismiss": { "message": "Ahora no, ocultar hasta la próxima vez" },
   "popupShortcutsMissing": { "message": "Los atajos de teclado aún no están configurados." },
+  "popupShortcutsIntro": { "message": "Consejo: los atajos de teclado saltan entre coincidencias. Puedes cambiarlos." },
   "popupShortcutsSet": { "message": "Configurar atajos" },
   "popupShortcutsDismiss": { "message": "No volver a mostrar" },
   "termAddAnother": { "message": "Añadir otra palabra" },

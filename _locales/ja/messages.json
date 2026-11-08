@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ この拡張機能を支援する" },
   "popupDonateDismiss": { "message": "今はしない、次回まで非表示にする" },
   "popupShortcutsMissing": { "message": "キーボードショートカットがまだ設定されていません。" },
+  "popupShortcutsIntro": { "message": "ヒント: キーボードショートカットで一致箇所を移動できます。変更も可能です。" },
   "popupShortcutsSet": { "message": "ショートカットを設定" },
   "popupShortcutsDismiss": { "message": "今後表示しない" },
   "termAddAnother": { "message": "単語を追加" },

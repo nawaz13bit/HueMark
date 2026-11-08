@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ 支持这个扩展" },
   "popupDonateDismiss": { "message": "暂时不用，下次再显示" },
   "popupShortcutsMissing": { "message": "尚未设置键盘快捷键。" },
+  "popupShortcutsIntro": { "message": "提示：可用键盘快捷键在匹配项之间跳转，也可自行更改。" },
   "popupShortcutsSet": { "message": "设置快捷键" },
   "popupShortcutsDismiss": { "message": "不再显示" },
   "termAddAnother": { "message": "添加另一个词" },

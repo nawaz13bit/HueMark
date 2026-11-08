@@ -25,8 +25,22 @@ async function initShortcutBanner() {
     const { huemark_shortcut_hint_dismissed } = await chrome.storage.local.get("huemark_shortcut_hint_dismissed");
     if (huemark_shortcut_hint_dismissed) return;
     const commands = await chrome.commands.getAll();
-    if (!commands.some((c) => c.name.startsWith("huemark-") && !c.shortcut)) return;
-    banner.hidden = false;
+    if (commands.some((c) => c.name.startsWith("huemark-") && !c.shortcut)) {
+      banner.hidden = false; // some key is unassigned: shown until dismissed
+    } else {
+      // All keys assigned: show a one-time first-run tip (Chrome, Edge, Firefox).
+      const { huemark_shortcut_intro_seen } = await chrome.storage.local.get("huemark_shortcut_intro_seen");
+      if (huemark_shortcut_intro_seen) return;
+      await chrome.storage.local.set({ huemark_shortcut_intro_seen: true });
+      const label = banner.querySelector("span");
+      label.dataset.i18n = "popupShortcutsIntro"; // keep the key in step with the text shown
+      label.textContent = chrome.i18n.getMessage("popupShortcutsIntro");
+      banner.hidden = false;
+    }
+    // Firefox before 137 cannot open its shortcuts page from an extension.
+    if (!chrome.commands.openShortcutSettings && navigator.userAgent.includes("Firefox")) {
+      document.getElementById("setShortcutsBtn").hidden = true;
+    }
   } catch (err) {
     console.warn("HueMark: shortcut check failed", err);
     return;
@@ -591,6 +605,9 @@ function markDuplicates() {
 
 enabledToggle.addEventListener("change", async () => {
   options.enabled = enabledToggle.checked;
+  // The off hint appears/disappears, so the popup resizes; hide scrollbars while the browser catches up.
+  document.documentElement.classList.add("resizing");
+  setTimeout(() => document.documentElement.classList.remove("resizing"), 300);
   renderEnabledLabel();
   if (activeTabId == null) return;
   try {

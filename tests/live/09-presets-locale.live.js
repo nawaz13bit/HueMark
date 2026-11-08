@@ -174,6 +174,90 @@ const ACCENT = `<!doctype html><html><head><meta charset="utf-8"><title>Café É
       });
     } finally { await srv3.close(); }
 
+    // ---- style-guide rules for reference() / marker(), driven with synthetic collect() data and a fixed "now"
+    const cite = (meta, url, style, page) => probe.evaluate(({ meta, url, style, page }) => {
+      const data = { url, title: meta.title || "Doc", meta, isPdf: false, blocks: [],
+        rows: [{ term: "alpha", before: "The ", hit: "alpha", after: " result held.", cutL: false, cutR: false, page: page || 0, line: 1 }] };
+      const labels = { citeTitle: "Citations", citeQuotes: "Quotes", citeReference: "Reference", none: "none", more: "more" };
+      return window.__huemarkExport.toCitations(data, ["alpha"], labels, { preset: "citation", mode: "snippet", style, now: new Date(2026, 10, 8) });
+    }, { meta, url, style, page });
+    const refOf = (md) => (md.split("## Reference\n\n")[1] || "").trim();
+    const quoteOf = (md) => (md.split("## Quotes")[1] || "").split("## Reference")[0];
+    const J = { title: "Plain Title", journal: "Journal of Tests", volume: "12", issue: "3", authors: ["Anna Smith"], date: "2020/05/01" };
+    const STD = "https://example.org/a";
+    try {
+      await t.check("APA: article-number page renders as \"Article N\", not a page range", async () => {
+        const r = refOf(await cite({ ...J, firstPage: "e0193972", doi: "10.1000/xyz" }, STD, "apa"));
+        return /, Article e0193972\./.test(r) && !/e0193972–/.test(r);
+      });
+      await t.check("APA: ordinary page range is left as a range", async () =>
+        /, 100–110\./.test(refOf(await cite({ ...J, firstPage: "100", lastPage: "110", doi: "10.1000/xyz" }, STD, "apa"))) );
+      await t.check("APA: database article without DOI gets no URL", async () => {
+        const r = refOf(await cite({ ...J, firstPage: "100", lastPage: "110" }, "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1/", "apa"));
+        return /100–110\.$/.test(r) && !/https?:/.test(r);
+      });
+      await t.check("APA: non-database article without DOI keeps its URL", async () =>
+        /<https:\/\/example\.org\/a>$/.test(refOf(await cite({ ...J, firstPage: "100", lastPage: "110" }, STD, "apa"))));
+      await t.check("APA: database article with a DOI keeps the DOI link", async () =>
+        /<https:\/\/doi\.org\/10\.1000\/xyz>$/.test(refOf(await cite({ ...J, firstPage: "100", doi: "10.1000/xyz" }, "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1/", "apa"))));
+
+      await t.check("IEEE: web source includes \"Accessed: Nov. 8, 2026.\" before [Online]", async () =>
+        /Accessed: Nov\. 8, 2026\. \[Online\]\. Available: <https:\/\/example\.org\/a>/.test(refOf(await cite({ title: "Web Page", authors: ["Anna Smith"], date: "2024/03/05" }, STD, "ieee"))));
+      await t.check("IEEE: article-number page renders as \"Art. no. N\", not pp.", async () => {
+        const r = refOf(await cite({ ...J, firstPage: "e0193972" }, STD, "ieee"));
+        return /, Art\. no\. e0193972/.test(r) && !/pp\./.test(r);
+      });
+      await t.check("IEEE: ordinary page range renders as \"pp.\"", async () =>
+        /, pp\. 100–110/.test(refOf(await cite({ ...J, firstPage: "100", lastPage: "110" }, STD, "ieee"))));
+
+      await t.check("Harvard: journal with DOI -> \"Available at: <https://doi.org/DOI>\", no \"doi:\"", async () => {
+        const r = refOf(await cite({ ...J, firstPage: "100", lastPage: "110", doi: "10.1000/xyz" }, STD, "harvard"));
+        return r.includes("Available at: <https://doi.org/10.1000/xyz>") && !/doi:/i.test(r) && !/Accessed/.test(r);
+      });
+      await t.check("Harvard: journal without DOI but with URL -> \"Available at: <url> (Accessed: 8 November 2026).\"", async () =>
+        refOf(await cite({ ...J, firstPage: "100", lastPage: "110" }, STD, "harvard")).includes("Available at: <https://example.org/a> (Accessed: 8 November 2026)."));
+      await t.check("Harvard: article-number page renders \", article N\", not \"pp.\"", async () => {
+        const r = refOf(await cite({ ...J, firstPage: "e0193972", doi: "10.1000/xyz" }, STD, "harvard"));
+        return r.includes(", article e0193972.") && !/pp\./.test(r);
+      });
+      await t.check("Harvard: web page with no personal author is credited to the site, italic title, no quotes", async () => {
+        const r = refOf(await cite({ title: "Plain Title", site: "Example Site", date: "2024/03/05" }, STD, "harvard"));
+        return r === "Example Site (2024) *Plain Title*. Available at: <https://example.org/a> (Accessed: 8 November 2026)." && !/[‘’“”]/.test(r);
+      });
+      const auth = (n) => ["Anna Smith", "Ben Jones", "Carl Brown", "Dina White"].slice(0, n);
+      await t.check("Harvard marker: 3 authors are all listed as \"A, B and C\"", async () =>
+        quoteOf(await cite({ ...J, authors: auth(3) }, STD, "harvard")).includes("(Smith, Jones and Brown, 2020)"));
+      await t.check("Harvard marker: 4 authors collapse to \"A et al.\"", async () =>
+        quoteOf(await cite({ ...J, authors: auth(4) }, STD, "harvard")).includes("(Smith et al., 2020)"));
+      await t.check("Harvard marker: 2 authors use \"A and B\"", async () =>
+        quoteOf(await cite({ ...J, authors: auth(2) }, STD, "harvard")).includes("(Smith and Jones, 2020)"));
+      const many = (n) => Array.from({ length: n }, (_, i) => `${String.fromCharCode(65 + i)}ia ${["Smith", "Jones", "Brown", "White", "Green", "Black", "Gray", "Lee", "King", "Hall", "Ford"][i]}`);
+      await t.check("Harvard reference list: 4 authors are all named, joined with \"and\" (no Oxford comma)", async () =>
+        /^Smith, A\.?, Jones, B\.?, Brown, C\.? and White, D\.? \(2020\)/.test(refOf(await cite({ ...J, authors: auth(4) }, STD, "harvard"))));
+      await t.check("Harvard reference list: 10 authors all named, 11 collapse to \"A et al.\"", async () => {
+        const r10 = refOf(await cite({ ...J, authors: many(10) }, STD, "harvard"));
+        const r11 = refOf(await cite({ ...J, authors: many(11) }, STD, "harvard"));
+        return !/et al/.test(r10) && /Hall/.test(r10) && /^Smith, A\.? et al\. \(2020\)/.test(r11);
+      });
+      await t.check("AMA: 7 authors -> first three + \"et al\"", async () =>
+        /^1\. Smith A\w*, Jones B\w*, Brown C\w*, et al\./.test(refOf(await cite({ ...J, authors: many(7) }, STD, "ama"))));
+      await t.check("AMA: 6 authors are all listed, no \"et al\"", async () => {
+        const r = refOf(await cite({ ...J, authors: many(6) }, STD, "ama"));
+        return !/et al/.test(r) && /Black F/.test(r);
+      });
+      await t.check("AMA: web page = Title. Site. Published date. Accessed date. <url>", async () => {
+        const r = refOf(await cite({ title: "Plain Title", authors: ["Anna Smith"], site: "Example Site", date: "2024/03/05" }, STD, "ama"));
+        return /Smith A\. Plain Title\.? Example Site\. Published March 5, 2024\. Accessed November 8, 2026\. <https:\/\/example\.org\/a>$/.test(r);
+      });
+
+      await t.check("Chicago: undated non-journal source has \"Accessed November 8, 2026.\" before the link", async () =>
+        /Accessed November 8, 2026\. <https:\/\/example\.org\/a>\.$/.test(refOf(await cite({ title: "Plain Title", authors: ["Anna Smith"], site: "Example Site" }, STD, "chicago"))));
+      await t.check("Chicago: dated non-journal source has no access date", async () =>
+        !/Accessed/.test(refOf(await cite({ title: "Plain Title", authors: ["Anna Smith"], site: "Example Site", date: "2024/03/05" }, STD, "chicago"))));
+      await t.check("Chicago: undated journal article has no access date", async () =>
+        !/Accessed/.test(refOf(await cite({ ...J, date: "", firstPage: "100", lastPage: "110", doi: "10.1000/xyz" }, STD, "chicago"))));
+    } catch (err) { await t.check(`style-guide reference checks ran: ${err.message}`, async () => false); }
+
     // ---- popup preset UI
     const popup = await ext.ctx.newPage();
     await popup.goto(ext.popupUrl);

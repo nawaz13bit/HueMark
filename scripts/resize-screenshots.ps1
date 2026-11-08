@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path -Parent $PSScriptRoot
-$srcDir = Join-Path $root "screenshots"
+$srcDir = Join-Path $root "media"
 $outDir = Join-Path $srcDir "store"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 

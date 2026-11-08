@@ -21,6 +21,7 @@ Built from `git log v0.1.1..HEAD` (9 commits) on 2026-11-03. Not published.
 - **Per-tab on/off.** Switch HueMark on or off for the current tab (or PDF) from the popup or the bar. Switching off clears that tab's highlights and keeps your terms.
 - **arXiv PDFs.** Links of the form arxiv.org/pdf/<id> open in HueMark's PDF viewer.
 - **Open PDF viewer** button in the popup, with an open bar inside the viewer.
+- **Keyboard shortcut tip.** On first run, if all shortcuts are assigned, the popup shows a one-time tip that the keys jump between matches and can be changed. If any shortcut is unassigned, the existing "Set shortcuts" banner still shows until dismissed.
 - **Help text** for presets, saved lists and PDFs, in all 13 interface languages.
 - **Test suites** in `tests/live/` (Chromium, Edge) and `tests/firefox/` (Firefox). Developer use only; not in the store packages.
 
@@ -42,5 +43,6 @@ Built from `git log v0.1.1..HEAD` (9 commits) on 2026-11-03. Not published.
 ## Known issues
 - Sub- and superscripts can run together in some exported equations (for example "CO 2carbondioxide").
 - Hidden-tab PDF export has not been verified.
-- Legal citation formats follow common practice. They have not been checked against official style guides, and non-English translations have not been reviewed by native speakers. Anything not recognised as a case falls back to a web-page citation.
+- Citation styles: APA 7, Vancouver (NLM) and IEEE were checked against their official guides, MLA 9 against secondary sources, and Chicago, Harvard and AMA against public university guides and real articles (not the official manuals).
+- Legal citation formats: OSCOLA was checked against its official guide and AGLC4 rules come from a library copy; Bluebook was checked only against a public guide; the rest follow common practice (many were checked on real court pages). Non-English translations have not been reviewed by native speakers. Anything not recognised as a case falls back to a web-page citation.
 - Safari is not supported.

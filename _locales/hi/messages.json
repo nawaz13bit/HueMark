@@ -22,6 +22,7 @@
   "popupDonateLink": { "message": "☕ इस एक्सटेंशन का समर्थन करें" },
   "popupDonateDismiss": { "message": "अभी नहीं, अगली बार तक छिपाएं" },
   "popupShortcutsMissing": { "message": "कीबोर्ड शॉर्टकट अभी सेट नहीं किए गए हैं।" },
+  "popupShortcutsIntro": { "message": "सुझाव: कीबोर्ड शॉर्टकट से आप मिलान के बीच जा सकते हैं। आप इन्हें बदल सकते हैं।" },
   "popupShortcutsSet": { "message": "शॉर्टकट सेट करें" },
   "popupShortcutsDismiss": { "message": "इसे दोबारा न दिखाएँ" },
   "termAddAnother": { "message": "एक और शब्द जोड़ें" },
