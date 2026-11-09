@@ -1,6 +1,6 @@
 # HueMark 0.2.0 release notes (draft)
 
-Built from `git log v0.1.1..HEAD` (9 commits) on 2026-11-03. Not published.
+Built from `git log v0.1.1..HEAD` (18 commits) on 2026-11-09. Not published.
 
 **Upgrading from 0.1.1:** HueMark now starts OFF in every tab. After updating, turn it on for each tab you want (popup switch, or the power button on the bar). The old global Enabled checkbox is gone. The extension also asks for one new permission, `contextMenus` (right-click menu), so the browser may ask you to approve the update.
 

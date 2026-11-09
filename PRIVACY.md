@@ -1,6 +1,6 @@
 # HueMark Privacy Policy
 
-_Last updated: 2026-11-01_
+_Last updated: 2026-11-09_
 
 HueMark does not collect, transmit, or sell any user data.
 
@@ -12,6 +12,8 @@ HueMark does not collect, transmit, or sell any user data.
   browser's built-in `chrome.storage.local` API.
 - Your Copy matches preferences (format, mode, citation style) and whether the
   popup's "Advanced" section was left open are saved the same way.
+- Whether you have seen or dismissed the one-time keyboard-shortcut tip is
+  saved the same way.
 - When Copy matches has collected a result that you have not copied yet, that
   result (the matched text with the text around it) is held in the browser's
   session storage. Session storage is cleared when the browser closes. If the
